@@ -7,6 +7,31 @@ $bets = [
     ['name' => 'Евгений', 'price' => 10500, 'ts' => strtotime('-' . rand(25, 50) .' hour')],
     ['name' => 'Семён', 'price' => 10000, 'ts' => strtotime('last week')]
 ];
+
+/*
+* Возвращает время в относительном формате.
+*
+* @param {number} $time
+* @return {string}
+*/
+function timeConversion($time) {
+
+    $oneDay = 86400;
+    $oneHour = 3600;
+
+    $time = time() - $time; 
+
+    if ($time >= $oneDay) {
+        return date('d.m.y \в H:i', $time);
+    }
+
+    if ($time < $oneDay && $time >= $oneHour) {
+        return  date('h', $time) . ' часов назад';
+    }
+
+    return date('i', $time) . ' минут назад';
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -109,14 +134,15 @@ $bets = [
                 </div>
                 <div class="history">
                     <h3>История ставок (<span>4</span>)</h3>
-                    <!-- заполните эту таблицу данными из массива $bets-->
+                    <?php foreach($bets as $key => $value): ?>
                     <table class="history__list">
                         <tr class="history__item">
-                            <td class="history__name"><!-- имя автора--></td>
-                            <td class="history__price"><!-- цена--> р</td>
-                            <td class="history__time"><!-- дата в человеческом формате--></td>
+                            <td class="history__name"><?=$value['name']; ?></td>
+                            <td class="history__price"><?=$value['price']; ?> р</td>
+                            <td class="history__time"><?=timeConversion($value['ts']); ?></td>                            
                         </tr>
                     </table>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>

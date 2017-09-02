@@ -14,7 +14,7 @@ $bets = [
 * @param {number} $time
 * @return {string}
 */
-function timeConversion($time) {
+function convertUnixTime($time) {
 
     $oneDay = 86400;
     $oneHour = 3600;
@@ -134,15 +134,15 @@ function timeConversion($time) {
                 </div>
                 <div class="history">
                     <h3>История ставок (<span>4</span>)</h3>
-                    <?php foreach($bets as $key => $value): ?>
                     <table class="history__list">
+                        <?php foreach($bets as $key => $value): ?>
                         <tr class="history__item">
                             <td class="history__name"><?=$value['name']; ?></td>
                             <td class="history__price"><?=$value['price']; ?> р</td>
-                            <td class="history__time"><?=timeConversion($value['ts']); ?></td>                            
+                            <td class="history__time"><?=convertUnixTime($value['ts']); ?></td>                            
                         </tr>
+                        <?php endforeach; ?>
                     </table>
-                    <?php endforeach; ?>
                 </div>
             </div>
         </div>

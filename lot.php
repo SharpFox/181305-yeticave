@@ -1,5 +1,6 @@
 <?php
 require_once('functions.php');
+require_once('lot_data.php');
 
 // ставки пользователей, которыми надо заполнить таблицу
 $bets = [
@@ -8,6 +9,15 @@ $bets = [
     ['name' => 'Евгений', 'price' => 10500, 'ts' => strtotime('-' . rand(25, 50) .' hour')],
     ['name' => 'Семён', 'price' => 10000, 'ts' => strtotime('last week')]
 ];
+
+$goodsItem = isset($_GET['id']) ? $_GET['id'] : null;
+
+if (!array_key_exists($goodsItem, $goodsCategory)) {
+    header('HTTP/1.1 404 Not Found');
+    print('Ошибка 404');
+
+    die();
+}
 ?>
 
 <!DOCTYPE html>
@@ -68,13 +78,13 @@ $bets = [
         </ul>
     </nav>
     <section class="lot-item container">
-        <h2>DC Ply Mens 2016/2017 Snowboard</h2>
+        <h2><?=$goodsContents[$goodsItem]['name']?></h2>
         <div class="lot-item__content">
             <div class="lot-item__left">
                 <div class="lot-item__image">
-                    <img src="img/lot-image.jpg" width="730" height="548" alt="Сноуборд">
+                    <img src=<?=$goodsContents[$goodsItem]['url']?> width="730" height="548" alt=<?=$goodsContents[$goodsItem]['name']?>>
                 </div>
-                <p class="lot-item__category">Категория: <span>Доски и лыжи</span></p>
+                <p class="lot-item__category">Категория: <span><?=$goodsContents[$goodsItem]['category']?></span></p>
                 <p class="lot-item__description">Легкий маневренный сноуборд, готовый дать жару в любом парке, растопив
                     снег
                     мощным щелчкоми четкими дугами. Стекловолокно Bi-Ax, уложенное в двух направлениях, наделяет этот
@@ -94,7 +104,7 @@ $bets = [
                     <div class="lot-item__cost-state">
                         <div class="lot-item__rate">
                             <span class="lot-item__amount">Текущая цена</span>
-                            <span class="lot-item__cost">11 500</span>
+                            <span class="lot-item__cost"><?=$goodsContents[$goodsItem]['cost']?></span>
                         </div>
                         <div class="lot-item__min-cost">
                             Мин. ставка <span>12 000 р</span>

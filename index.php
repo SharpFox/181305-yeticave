@@ -15,39 +15,39 @@ $lot_time_remaining = gmdate("H:i", ($tomorrow - $now));
 $goodsCategory = ["Доски и лыжи","Крепления","Ботинки","Одежда","Инструменты","Разное"];
 $goodsContents = [
     [
-        'name' => "2014 Rossignol District Snowboard",
+        'name' => htmlspecialchars("2014 Rossignol District Snowboard"),
         'category' => "Доски и лыжи",
-        'cost' => 10999,
+        'cost' => htmlspecialchars(10999),
         'url' => "img/lot-1.jpg"
     ],
     [
-        'name' => "DC Ply Mens 2016/2017 Snowboard",
+        'name' => htmlspecialchars("DC Ply Mens 2016/2017 Snowboard"),
         'category' => "Доски и лыжи",
-        'cost' => 159999,
+        'cost' => htmlspecialchars(159999),
         'url' => "img/lot-2.jpg"
     ],
     [
-        'name' => "Крепления Union Contact Pro 2015 года размер L/XL",
+        'name' => htmlspecialchars("Крепления Union Contact Pro 2015 года размер L/XL"),
         'category' => "Крепления",
-        'cost' => 8000,
+        'cost' => htmlspecialchars(8000),
         'url' => "img/lot-3.jpg"
     ],
     [
-        'name' => "Ботинки для сноуборда DC Mutiny Charocal",
+        'name' => htmlspecialchars("Ботинки для сноуборда DC Mutiny Charocal"),
         'category' => "Ботинки",
-        'cost' => 10999,
+        'cost' => htmlspecialchars(10999),
         'url' => "img/lot-4.jpg"
     ],
     [
-        'name' => "Куртка для сноуборда DC Mutiny Charocal",
+        'name' => htmlspecialchars("Куртка для сноуборда DC Mutiny Charocal"),
         'category' => "Одежда",
-        'cost' => 7500,
+        'cost' => htmlspecialchars(7500),
         'url' => "img/lot-5.jpg"
     ],
     [
-        'name' => "Маска Oakley Canopy",
+        'name' => htmlspecialchars("Маска Oakley Canopy"),
         'category' => "Разное",
-        'cost' => 5400,
+        'cost' => htmlspecialchars(5400),
         'url' => "img/lot-6.jpg"
     ]
 ];
@@ -60,16 +60,17 @@ $indexVar = [
     'lot_time_remaining' => $lot_time_remaining
 ];
 
-$indexContent = renderTemplate('templates/index.php', $indexVar);
+$indexContent = toRenderTemplate('index.php', $indexVar);
 
 $layoutVar = [ 
     'content' => $indexContent,
     'title' => 'Главная',
     'is_auth' => $is_auth,
-    'user_name' => $user_name
+    'user_name' => $user_name,
+    'user_avatar' => $user_avatar
 ];
 
-$layoutContent = renderTemplate('templates/layout.php', $layoutVar);
+$layoutContent = toRenderTemplate('layout.php', $layoutVar);
     
 print($layoutContent);
 ?>

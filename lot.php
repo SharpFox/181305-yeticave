@@ -1,4 +1,6 @@
 <?php
+header('Content-Type: text/html; charset=utf-8');
+
 require_once('functions.php');
 require_once('lot_data.php');
 
@@ -12,7 +14,7 @@ $bets = [
 
 $goodsItem = isset($_GET['id']) ? $_GET['id'] : null;
 
-if (!array_key_exists($goodsItem, $goodsCategory)) {
+if (!array_key_exists($goodsItem, $goodsContents)) {
     header('HTTP/1.1 404 Not Found');
     print('Ошибка 404');
 

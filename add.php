@@ -1,28 +1,21 @@
 <?php
-header('Content-Type: text/html; charset=utf-8');
-
 require_once('functions.php');
 require_once('data.php');
-
-$goodsItem = isset($_GET['id']) ? $_GET['id'] : null;
-toPrintErrorInfo($goodsItem, $goodsContent);
 
 $navVar = ['goodsCategory' => $goodsCategory];
 $navContent = toRenderTemplate('nav.php', $navVar);
 
-$lotVar = [ 
-    'goodsContent' => $goodsContent,
-    'goodsItem' => $goodsItem,
-    'navigationMenu' => $navContent,
-    'bets' => $bets
+$addVar = [
+    'goodsCategory' => $goodsCategory,
+    'navigationMenu' => $navContent
 ];
 
-$lotContent = toRenderTemplate('lot.php', $lotVar);
+$addContent = toRenderTemplate('add.php', $addVar);
 
 $layoutVar = [ 
-    'content' => $lotContent,
+    'content' => $addContent,
     'navigationMenu' => $navContent,
-    'title' => $goodsContent[$goodsItem]['name'],
+    'title' => 'Добавление лота',
     'isMainPage' => false,
     'isAuth' => $isAuth,
     'userName' => $userName,

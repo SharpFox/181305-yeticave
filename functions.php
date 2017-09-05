@@ -29,19 +29,37 @@ function toRenderTemplate($path, $varArray) {
 */
 function convertUnixTime($time) {
     
-        $oneDay = 86400;
-        $oneHour = 3600;
+    $oneDay = 86400;
+    $oneHour = 3600;
     
-        $time = time() - $time; 
+    $time = time() - $time; 
     
-        if ($time >= $oneDay) {
-            return date('d.m.y \в H:i', $time);
-        }
-    
-        if ($time < $oneDay && $time >= $oneHour) {
-            return  date('h', $time) . ' часов назад';
-        }
-    
-        return date('i', $time) . ' минут назад';
+    if ($time >= $oneDay) {
+        return date('d.m.y \в H:i', $time);
     }
+    
+    if ($time < $oneDay && $time >= $oneHour) {
+        return  date('h', $time) . ' часов назад';
+    }
+    
+    return date('i', $time) . ' минут назад';
+}
+
+/*
+* Выводит на экран информацию об ошибке в случае,
+* если указанный ключ или индекс отсутствуют в массиве.
+*
+* @param mixed $value
+* @param array $currentArray
+*/
+function toPrintErrorInfo($value, $currentArray) {
+    if (array_key_exists($value, $currentArray)) {
+        return;
+    }
+
+    header('HTTP/1.1 404 Not Found');
+    print('Ошибка 404');
+
+    die();
+}
 ?>

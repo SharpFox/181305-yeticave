@@ -1,36 +1,39 @@
 <?php
 require_once('functions.php');
-require_once('lot_data.php');
-
-// аутентификация
-$is_auth = (bool) rand(0, 1);
-$user_name = 'Константин';
-$user_avatar = 'img/user.jpg';
+require_once('data.php');
 
 // установка часового пояса и получение времени
 date_default_timezone_set('Europe/Moscow');
-$lot_time_remaining = "00:00";
+$lotTimeRemaining = "00:00";
 $tomorrow = strtotime('tomorrow midnight');
 $now = strtotime('now');
-$lot_time_remaining = gmdate("H:i", ($tomorrow - $now));
+$lotTimeRemaining = gmdate("H:i", ($tomorrow - $now));
 
-// данные товаров
-$goodsCategory = ["Доски и лыжи","Крепления","Ботинки","Одежда","Инструменты","Разное"];
+$navVar = ['goodsCategory' => $goodsCategory];
+$navContent = toRenderTemplate('nav.php', $navVar);
+
+$lotsItemVar = [
+    'goodsContent' => $goodsContent,
+    'lotTimeRemaining' => $lotTimeRemaining
+];
+
+$lotsItemContent = toRenderTemplate('lots-item.php', $lotsItemVar);
 
 $indexVar = [ 
     'goodsCategory' => $goodsCategory,
-    'goodsContents' => $goodsContents,
-    'lot_time_remaining' => $lot_time_remaining
+    'lotsItemContent' => $lotsItemContent    
 ];
 
 $indexContent = toRenderTemplate('index.php', $indexVar);
 
 $layoutVar = [ 
     'content' => $indexContent,
+    'navigationMenu' => $navContent,
     'title' => 'Главная',
-    'is_auth' => $is_auth,
-    'user_name' => $user_name,
-    'user_avatar' => $user_avatar
+    'isMainPage' => true,
+    'isAuth' => $isAuth,
+    'userName' => $userName,
+    'userAvatar' => $userAvatar
 ];
 
 $layoutContent = toRenderTemplate('layout.php', $layoutVar);

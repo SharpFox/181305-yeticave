@@ -50,4 +50,29 @@ $bets = [
     ['name' => 'Евгений', 'price' => 10500, 'ts' => strtotime('-' . rand(25, 50) .' hour')],
     ['name' => 'Семён', 'price' => 10000, 'ts' => strtotime('last week')]
 ];
+
+$rules = [
+    'lot-name' => [
+        'required'
+    ],
+    'category' => [
+        'required'
+    ],
+    'message' => [
+        'required'
+    ],
+    'lot-rate' => [
+        'required',
+        'numeric'
+    ],
+    'lot-step' => [
+        'required',
+        'numeric'
+    ],
+    'lot-date' => [
+        'required'
+    ]
+];
+
+$lotImageName = 'add-img';
 ?>

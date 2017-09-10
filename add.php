@@ -5,15 +5,37 @@ require_once('data.php');
 $navVar = ['goodsCategory' => $goodsCategory];
 $navContent = toRenderTemplate('nav.php', $navVar);
 
-$addVar = [
-    'goodsCategory' => $goodsCategory,
-    'navigationMenu' => $navContent
-];
+$errors = validateForm($rules);
+$fileErrorText = validateFile($lotImageName);
 
-$addContent = toRenderTemplate('add.php', $addVar);
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($errors) && $fileErrorText == Null) {
+   
+    loadFileToServer($lotImageName);
+    
+    $lotData = getLotData($lotImageName); 
+    $goodsItem = 0;    
+    
+    $lotVar = [
+        'goodsContent' => $lotData,
+        'goodsItem' => $goodsItem,
+        'navigationMenu' => $navContent,
+        'bets' => $bets
+    ];
+
+    $content = toRenderTemplate('lot.php', $lotVar);
+} else {
+    $addVar = [
+        'goodsCategory' => $goodsCategory,
+        'navigationMenu' => $navContent,
+        'errors' => $errors,
+        'fileErrorText' => $fileErrorText
+    ];
+
+    $content = toRenderTemplate('add.php',  $addVar);
+}
 
 $layoutVar = [ 
-    'content' => $addContent,
+    'content' => $content,
     'navigationMenu' => $navContent,
     'title' => 'Добавление лота',
     'isMainPage' => false,

@@ -70,12 +70,8 @@ function toPrintErrorInfo($value, $currentArray) {
 * @param array $rules
 * @return array
 */
-function validateForm($rules) {
+function validateFormFields($rules) {
     $errors = [];
-
-    if ($_SERVER['REQUEST_METHOD'] != 'POST') {
-        return $errors;
-    }
 
     foreach($rules as $key => $rule) {
         foreach($rule as $subRule) {
@@ -84,6 +80,9 @@ function validateForm($rules) {
             }
             if ($subRule === 'numeric' && isset($_POST[$key]) && !filter_var($_POST[$key], FILTER_VALIDATE_FLOAT)) {
                 $errors[$key][] = 'Данные не соответствуют типу Число';
+            }            
+            if ($subRule === 'validateFile' && isset($_FILES[$key]['name']) || !empty($_FILES[$key]['name'])) {
+                $errors[$key][] = call_user_func($subRule . "(" . $key . ")");
             }
         }
     }

@@ -7,7 +7,7 @@
                 <img src=<?=$goodsContent[$goodsItem]['url']?> width="730" height="548" alt=<?=$goodsContent[$goodsItem]['name']?>>
             </div>
             <p class="lot-item__category">Категория: <span><?=$goodsContent[$goodsItem]['category']?></span></p>
-            <p class="lot-item__description"><?=$lotDescription[$descriptionDefaulItem]['description']?></p>
+            <p class="lot-item__description"><?=$goodsContent[$goodsItem]['description']?></p>
         </div>
         <div class="lot-item__right">
             <div class="lot-item__state">

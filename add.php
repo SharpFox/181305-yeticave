@@ -4,52 +4,89 @@ require_once('data.php');
 
 $ValueOfAttributeName = 'add-img';
 $lotData = [];
+$errors = [];
+$errorFileLoading = NULL;
+$checkingAttribute = [
+    'lot-name' => [
+        'required',
+        'validateFormFields'
+    ],
+    'category' => [
+        'required',
+        'validateFormFields'
+    ],
+    'message' => [
+        'required',
+        'validateFormFields'
+    ],
+    'lot-rate' => [
+        'required',
+        'numeric',
+        'validateFormFields'
+    ],
+    'lot-step' => [
+        'required',
+        'numeric',
+        'validateFormFields'
+    ],
+    'lot-date' => [
+        'required',
+        'validateFormFields'
+    ],
+    'add-img' => [
+        'validateFile'
+    ]
+];
 
 $navVar = ['goodsCategory' => $goodsCategory];
 $navContent = toRenderTemplate('nav.php', $navVar);
 
-$errors = validateForm($rules);
-
-if (isset($_FILES[$ValueOfAttributeName]) || !empty($_FILES[$ValueOfAttributeName]['name'])) {
-    $validateFileError = validateFile($ValueOfAttributeName);   
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $errors = validateFormFields($rules);
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($errors) && $validateFileError == Null) {
-   
-    if (isset($_FILES[$ValueOfNameAttribute]['name']) && !empty($_FILES[$ValueOfNameAttribute]['name'])) {
-        $loadFileError = loadFileToServer($ValueOfAttributeName);    
-    }    
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {   
+    if (isset($_FILES['add-img']['name']) && !empty($_FILES['add-img']['name'])) {
+        $errors['add-img'][] = loadFileToServer('add-img');
+    }
+
+    $lotData = [
+        [
+            'name' => htmlspecialchars($_POST['lot-name']),
+            'category' => $_POST['category'],
+            'cost' => htmlspecialchars($_POST['lot-rate']),
+            'url' => '/img/' . $_FILES['add-img']['name'],
+            'description' => $_POST['message']
+        ]
+    ];  
     
-    if (isset($_FILES[$ValueOfAttributeName]['name']) && !empty($_FILES[$ValueOfAttributeName]['name'])) {
+    $lotVar = [
+        'goodsContent' => $lotData,
+        'goodsItem' => 0,
+        'descriptionDefaulItem' => 0,
+        'navigationMenu' => $navContent,
+        'bets' => $bets,
+        'errorFileLoading' => $errorFileLoading
+    ];
+
+    $content = toRenderTemplate('lot.php', $lotVar);
+} else {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lotData = [
             [
                 'name' => htmlspecialchars($_POST['lot-name']),
                 'category' => $_POST['category'],
                 'cost' => htmlspecialchars($_POST['lot-rate']),
-                'url' => '/img/' . $_FILES[$ValueOfAttributeName]['name']
+                'url' => '/img/' . $_FILES['add-img']['name'],
+                'description' => $_POST['message']
             ]
-        ];
-    }
-  
-    $goodsItem = 0;    
-    $descriptionDefaulItem = 0;
+            ];  
+        }
     
-    $lotVar = [
-        'goodsContent' => $lotData,
-        'goodsItem' => $goodsItem,
-        'descriptionDefaulItem' => $descriptionDefaulItem,
-        'navigationMenu' => $navContent,
-        'bets' => $bets,
-        'lotDescription' => $lotDescription
-    ];
-
-    $content = toRenderTemplate('lot.php', $lotVar);
-} else {
     $addVar = [
         'goodsCategory' => $goodsCategory,
         'navigationMenu' => $navContent,
-        'errors' => $errors,
-        'validateFileError' => $validateFileError
+        'errors' => $errors
     ];
 
     $content = toRenderTemplate('add.php',  $addVar);

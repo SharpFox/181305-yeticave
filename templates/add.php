@@ -25,7 +25,7 @@
     <span class="form__error"><?=key_exists('message', $errors) ? $errors['message'] : '' ?></span>
   </div>
 
-  <div class="form__item form__item--file<?= $validateFileError !== Null ? 'form__item--invalid' : ''; ?>">
+  <div class="form__item form__item--file">
     <label>Изображение</label>
     <div class="preview">
       <button class="preview__remove" type="button">x</button>
@@ -39,6 +39,7 @@
         <span>+ Добавить</span>
       </label>
     </div>
+    <span class="form__error"><?=key_exists('add-img', $errors) ? $errors['add-img'] : '' ?></span>
   </div>
   <div class="form__container-three">
     <div class="form__item form__item--small<?=key_exists('lot-rate', $errors) ? ' form__item--invalid' : '';?>">

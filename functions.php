@@ -92,54 +92,43 @@ function validateForm($rules) {
 
 /*
 * Проверяет файл на ряд заданных параметров:
-* 1. Расширение, jpeg;
-* 2. Размер файла 1 мб.
 *
-* @param string $imageName
-* @return string 
+* @param string $attributeValue
+* @return null || string
 */
-function validateFile($imageName) {
-    $errorText = null;
+function validateFile($attributeValue) {
+    $result = null;
     $maxSize = 1048576;
 
-    if (!isset($_FILES[$imageName]) || empty($_FILES[$imageName]['name'])) {
-        return $errorText;    
-    }
+    $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES[$attributeValue]['tmp_name']);
 
-    $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES[$imageName]['tmp_name']);
+    if ($type !== 'image/jpeg') {
+        $result = 'Загрузите картинку в формате jpeg';   
+    }
+    if ($_FILES[$attributeValue]['size'] > $maxSize) {
+        $result = empty($result) ? 'Максимальный размер файла: 1 мб' : $result .= $result . '. /n Максимальный размер файла: 1 мб';   
+    }
     
-    $errorText = $type !== 'image/jpeg' ? $errorText .= 'Загрузите картинку в формате jpeg' : $errorText .= '';
-    return $_FILES[$imageName]['size'] > $maxSize ? $errorText .= 'Максимальный размер файла: 1 мб' : $errorText .= '';
+    return $result;
 }
 
-function loadFileToServer($imageName) {    
-    if (!isset($_FILES[$imageName]['name']) && empty($_FILES[$imageName]['name'])) {
-        return;     
-    }
-    $fileName = $_FILES[$imageName]['name'];
+/*
+* Загружает файл на сервер.
+*
+* @param string attributeValue
+* @return null || string
+*/
+function loadFileToServer($attributeValue) {  
+    $result = null;    
+    $fileName = $_FILES[$attributeValue]['name'];
     $filePath = __DIR__ . '/img/';
-        
-    if (!file_exists($filePath)) {
-        move_uploaded_file($_FILES[$imageName]['tmp_name'], $filePath . $fileName);
-    }  
-}
 
-function getLotData($imageName) {
-    $lotData = [];
-
-    if (!isset($_FILES[$imageName]['name']) && empty($_FILES[$imageName]['name'])) {
-        return $lotData;     
+    try {
+        move_uploaded_file($_FILES[$attributeValue]['tmp_name'], $filePath . $fileName . "_" . strtotime(time()));
+    } catch (Exception $e) {
+        $result = "Не удалось загрузить файл " . $fileName;
     }
 
-    $lotData = [
-        [
-            'name' => htmlspecialchars($_POST['lot-name']),
-            'category' => $_POST['category'],
-            'cost' => htmlspecialchars($_POST['lot-rate']),
-            'url' => '/img/' . $_FILES[$imageName]['name']
-        ],
-    ];
-
-    return $lotData;
+    return $result; 
 }
 ?>

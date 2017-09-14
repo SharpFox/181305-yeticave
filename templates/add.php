@@ -6,7 +6,7 @@
     <div class="form__item<?=key_exists('lot-name', $errors) ? ' form__item--invalid' : '';?>">
       <label for="lot-name">Наименование</label>
       <input id="lot-name" type="text" name="lot-name" placeholder="Введите наименование лота" required>
-      <span class="form__error"><?=key_exists('lot-name', $errors) ? implode(', ', $errors['lot-name']) : '' ?></span>
+      <span class="form__error"><?=key_exists('lot-name', $errors) ? $errors['lot-name'] : '' ?></span>
     </div>
     <div class="form__item<?=key_exists('category', $errors) ? ' form__item--invalid' : '';?>">
       <label for="category">Категория</label>
@@ -16,16 +16,16 @@
           <option value="<?=$value; ?>" <?=key_exists('category', $_POST) && $_POST['category'] == $value ? 'selected' : '' ?>><?=$value;?></option>   
         <?php endforeach; ?>
       </select>
-      <span class="form__error"><?=key_exists('category', $errors) ? implode(', ', $errors['category']) : '' ?></span>
+      <span class="form__error"><?=key_exists('category', $errors) ? $errors['category'] : '' ?></span>
     </div>
   </div>
   <div class="form__item form__item--wide<?=key_exists('message', $errors) ? ' form__item--invalid' : '';?>">
     <label for="message">Описание</label>
     <textarea id="message" name="message" placeholder="Напишите описание лота" required><?=key_exists('message', $_POST) ? $_POST['message'] : ''; ?></textarea>
-    <span class="form__error"><?=key_exists('message', $errors) ? implode(', ', $errors['message']) : '' ?></span>
+    <span class="form__error"><?=key_exists('message', $errors) ? $errors['message'] : '' ?></span>
   </div>
 
-  <div class="form__item form__item--file<?= $fileErrorText !== Null ? 'form__item--invalid' : ''; ?>"> <!--form__item--uploaded-->
+  <div class="form__item form__item--file<?= $validateFileError !== Null ? 'form__item--invalid' : ''; ?>">
     <label>Изображение</label>
     <div class="preview">
       <button class="preview__remove" type="button">x</button>
@@ -44,18 +44,18 @@
     <div class="form__item form__item--small<?=key_exists('lot-rate', $errors) ? ' form__item--invalid' : '';?>">
       <label for="lot-rate">Начальная цена</label>
       <input id="lot-rate" type="number" name="lot-rate" placeholder="0" value="<?=key_exists('lot-rate', $_POST) ? $_POST['lot-rate'] : ''; ?>" required>
-      <span class="form__error"><?=key_exists('lot-rate', $errors) ? implode(', ', $errors['lot-rate']) : '' ?></span>
+      <span class="form__error"><?=key_exists('lot-rate', $errors) ? $errors['lot-rate'] : '' ?></span>
     </div>
     <div class="form__item form__item--small<?=key_exists('lot-step', $errors) ? ' form__item--invalid' : '';?>">
       <label for="lot-step">Шаг ставки</label>
       <input id="lot-step" type="number" name="lot-step" placeholder="0" value="<?=key_exists('lot-step', $_POST) ? $_POST['lot-step'] : ''; ?>" required>
-      <span class="form__error"><?=key_exists('lot-step', $errors) ? implode(', ', $errors['lot-step']) : '' ?></span>
+      <span class="form__error"><?=key_exists('lot-step', $errors) ? $errors['lot-step'] : '' ?></span>
     </div>
     <div class="form__item<?=key_exists('lot-date', $errors) ? ' form__item--invalid' : '';?>">
       <label for="lot-date">Дата завершения</label>
       <input class="form__input-date" id="lot-date" type="text" name="lot-date" placeholder="20.05.2017" value="<?=key_exists('lot-date', $_POST) ? $_POST['lot-date'] : ''; ?>" required>
       <span class="form__error"></span>
-    </div><span class="form__error"><?=key_exists('lot-date', $errors) ? implode(', ', $errors['lot-date']) : '' ?></span>
+    </div><span class="form__error"><?=key_exists('lot-date', $errors) ? $errors['lot-date'] : '' ?></span>
   </div>
   <span class="form__error form__error--bottom">Пожалуйста, исправьте ошибки в форме.</span>
   <button type="submit" class="button">Добавить лот</button>

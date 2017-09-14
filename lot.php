@@ -10,11 +10,15 @@ toPrintErrorInfo($goodsItem, $goodsContent);
 $navVar = ['goodsCategory' => $goodsCategory];
 $navContent = toRenderTemplate('nav.php', $navVar);
 
+$descriptionDefaulItem = 0;
+
 $lotVar = [ 
     'goodsContent' => $goodsContent,
     'goodsItem' => $goodsItem,
     'navigationMenu' => $navContent,
-    'bets' => $bets
+    'bets' => $bets,
+    'lotDescription' => $lotDescription,
+    'descriptionDefaulItem' => $descriptionDefaulItem,
 ];
 
 $lotContent = toRenderTemplate('lot.php', $lotVar);

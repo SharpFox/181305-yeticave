@@ -77,27 +77,4 @@ $bets = [
         'ts' => strtotime('last week')
     ]
 ];
-
-$rules = [
-    'lot-name' => [
-        'required'
-    ],
-    'category' => [
-        'required'
-    ],
-    'message' => [
-        'required'
-    ],
-    'lot-rate' => [
-        'required',
-        'numeric'
-    ],
-    'lot-step' => [
-        'required',
-        'numeric'
-    ],
-    'lot-date' => [
-        'required'
-    ]
-];
 ?>

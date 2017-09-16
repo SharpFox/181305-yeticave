@@ -74,15 +74,27 @@ function validateFormFields($rules) {
     $errors = [];
 
     foreach($rules as $key => $rule) {
-        foreach($rule as $subRule) {
-            if ($subRule === 'required' && !isset($_POST[$key]) || $_POST[$key] == '') {
-                $errors[$key][] = 'Поле не может быть пустым';
-            }
-            if ($subRule === 'numeric' && isset($_POST[$key]) && !filter_var($_POST[$key], FILTER_VALIDATE_FLOAT)) {
-                $errors[$key][] = 'Данные не соответствуют типу Число';
-            }            
-            if ($subRule === 'validateFile' && isset($_FILES[$key]['name']) || !empty($_FILES[$key]['name'])) {
-                $errors[$key][] = call_user_func($subRule . "(" . $key . ")");
+        foreach($rule as $subRule) {           
+            if (isset($_POST[$key])) {
+                if ($subRule === 'required' && $_POST[$key] == '') {
+                    $errors[$key][] = 'Поле не может быть пустым';
+                }
+                if ($subRule === 'numeric' && !filter_var($_POST[$key], FILTER_VALIDATE_FLOAT)) {
+                    $errors[$key][] = 'Данные не соответствуют типу Число';
+                } 
+                if ($subRule === 'notNegative' && filter_var($_POST[$key], FILTER_VALIDATE_FLOAT)) {
+                    if ($_POST[$key] < 0) {
+                        $errors[$key][] = 'Значение не может быть отрицательным';
+                    }
+                } 
+                if ($subRule === 'date' && date("M.D.Y", strtotime($_POST[$key])) === $_POST[$key]) {
+                    $errors[$key][] = 'Дата введена не правильно';
+                }     
+            }  
+            if (isset($_FILES[$key])) {     
+                if ($subRule === 'validateFile' && isset($_FILES[$key]['name']) || !empty($_FILES[$key]['name'])) {
+                    $errors[$key][] = call_user_func($subRule, $key);
+                }
             }
         }
     }
@@ -105,7 +117,7 @@ function validateFile($attributeValue) {
         $result = 'Загрузите картинку в формате jpeg';   
     }
     if ($_FILES[$attributeValue]['size'] > $maxSize) {
-        $result = empty($result) ? 'Максимальный размер файла: 1 мб' : $result .= $result . '. /n Максимальный размер файла: 1 мб';   
+        $result = empty($result) ? 'Максимальный размер файла: 1 мб' : $result .= $result . '. Максимальный размер файла: 1 мб';   
     }
     
     return $result;

@@ -6,13 +6,14 @@ $ValueOfAttributeName = 'add-img';
 $lotData = [];
 $errors = [];
 $errorFileLoading = NULL;
-$checkingAttribute = [
+$rules = [
     'lot-name' => [
         'required',
         'validateFormFields'
     ],
     'category' => [
         'required',
+        
         'validateFormFields'
     ],
     'message' => [
@@ -22,15 +23,18 @@ $checkingAttribute = [
     'lot-rate' => [
         'required',
         'numeric',
+        'notNegative',
         'validateFormFields'
     ],
     'lot-step' => [
         'required',
         'numeric',
+        'notNegative',
         'validateFormFields'
     ],
     'lot-date' => [
         'required',
+        'date',
         'validateFormFields'
     ],
     'add-img' => [

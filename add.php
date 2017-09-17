@@ -12,8 +12,7 @@ $rules = [
         'validateFormFields'
     ],
     'category' => [
-        'required',
-        
+        'required',        
         'validateFormFields'
     ],
     'message' => [
@@ -38,20 +37,38 @@ $rules = [
         'validateFormFields'
     ],
     'add-img' => [
-        'validateFile'
+        'validateFile',
+        'specialSymbols'
     ]
 ];
 
 $navVar = ['goodsCategory' => $goodsCategory];
 $navContent = toRenderTemplate('nav.php', $navVar);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $errors = validateFormFields($rules);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST)) {
+    $errors['add-img'][] = 'Возникла непредвиденная ошибка. Возможно, была предпринята попытка загрузки файла
+        очень большого размера';   
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {   
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
+    foreach ($_POST as $postKey => $value) {
+        $_POST[$postKey] = makeSymbolsLegal($_POST[$postKey]);  
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
+    $errors = validateFormFields($rules);
+    if ($_POST['category'] === 'Выберите категорию') {
+        $errors['category'][] = 'Не выбрана категория';
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {   
     if (isset($_FILES['add-img']['name']) && !empty($_FILES['add-img']['name'])) {
-        $errors['add-img'][] = loadFileToServer('add-img');
+        $result = loadFileToServer('add-img');
+        if ($result !== NULL) {
+            $errors['add-img'][] = $result;
+        }        
     }
 
     $lotData = [
@@ -60,7 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
             'category' => $_POST['category'],
             'cost' => htmlspecialchars($_POST['lot-rate']),
             'url' => '/img/' . $_FILES['add-img']['name'],
-            'description' => $_POST['message']
+            'description' => $_POST['message'],
+            'step' => $_POST['lot-step'],
+            'rateEndTime' => getHumanTimeUntilRateEnd(strtotime($_POST['lot-date'] . ' 23:59:59'))
         ]
     ];  
     
@@ -75,18 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 
     $content = toRenderTemplate('lot.php', $lotVar);
 } else {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $lotData = [
-            [
-                'name' => htmlspecialchars($_POST['lot-name']),
-                'category' => $_POST['category'],
-                'cost' => htmlspecialchars($_POST['lot-rate']),
-                'url' => '/img/' . $_FILES['add-img']['name'],
-                'description' => $_POST['message']
-            ]
-            ];  
-        }
-    
     $addVar = [
         'goodsCategory' => $goodsCategory,
         'navigationMenu' => $navContent,

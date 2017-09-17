@@ -17,8 +17,9 @@ $lotVar = [
     'goodsItem' => $goodsItem,
     'navigationMenu' => $navContent,
     'bets' => $bets,
-    'lotDescription' => $lotDescription,
+    'lotDescription' => $lotDefaultDescription,
     'descriptionDefaulItem' => $descriptionDefaulItem,
+    'rateEndTime' => $defaultRateEndTime
 ];
 
 $lotContent = toRenderTemplate('lot.php', $lotVar);

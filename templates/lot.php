@@ -1,4 +1,5 @@
 <?=$navigationMenu;?>
+
 <section class="lot-item container">
     <h2><?=$goodsContent[$goodsItem]['name']?></h2>
     <div class="lot-item__content">
@@ -12,7 +13,7 @@
         <div class="lot-item__right">
             <div class="lot-item__state">
                 <div class="lot-item__timer timer">
-                    10:54:12
+                    <?=$goodsContent[$goodsItem]['rateEndTime']?>
                 </div>
                 <div class="lot-item__cost-state">
                     <div class="lot-item__rate">
@@ -20,13 +21,13 @@
                         <span class="lot-item__cost"><?=$goodsContent[$goodsItem]['cost']?></span>
                     </div>
                     <div class="lot-item__min-cost">
-                        Мин. ставка <span>12 000 р</span>
+                        Мин. ставка <span><?=$goodsContent[$goodsItem]['cost']?></span>
                     </div>
                 </div>
                 <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
                     <p class="lot-item__form-item">
                         <label for="cost">Ваша ставка</label>
-                        <input id="cost" type="number" name="cost" placeholder="12 000">
+                        <input id="cost" type="number" step="<?=$goodsContent[$goodsItem]['step']?>" value="<?=$goodsContent[$goodsItem]['cost']?>" name="cost" placeholder="<?=$goodsContent[$goodsItem]['cost']?>">
                     </p>
                     <button type="submit" class="button">Сделать ставку</button>
                 </form>
@@ -38,7 +39,7 @@
                     <tr class="history__item">
                         <td class="history__name"><?=$value['name']; ?></td>
                         <td class="history__price"><?=$value['price']; ?> р</td>
-                        <td class="history__time"><?=convertUnixTime($value['ts']); ?></td>                            
+                        <td class="history__time"><?=getHumanTimeOfLastRate($value['ts']); ?></td>                            
                     </tr>
                     <?php endforeach; ?>
                 </table>

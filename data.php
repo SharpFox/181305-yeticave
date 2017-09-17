@@ -1,9 +1,10 @@
 <?php 
 date_default_timezone_set('Europe/Moscow');
 
-$isAuth = (bool) rand(0, 1);
-$userName = 'Константин';
+//$isAuth = (bool) rand(0, 1);
+//$userName = 'Константин';
 $userAvatar = 'img/user.jpg';
+$isAuth = false;
 
 $goodsCategory = ['Доски и лыжи','Крепления','Ботинки','Одежда','Инструменты','Разное'];
 

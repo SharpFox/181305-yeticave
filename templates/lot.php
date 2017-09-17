@@ -11,6 +11,7 @@
             <p class="lot-item__description"><?=$goodsContent[$goodsItem]['description']?></p>
         </div>
         <div class="lot-item__right">
+            <?php if ($isAuth): ?> 
             <div class="lot-item__state">
                 <div class="lot-item__timer timer">
                     <?=$goodsContent[$goodsItem]['lotTimeRemaining']?>
@@ -32,6 +33,7 @@
                     <button type="submit" class="button">Сделать ставку</button>
                 </form>
             </div>
+            <?php endif; ?>
             <div class="history">
                 <h3>История ставок (<span>4</span>)</h3>
                 <table class="history__list">

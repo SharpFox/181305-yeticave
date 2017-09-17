@@ -44,7 +44,7 @@ function toRenderTemplate($path, $varArray) {
     extract($varArray, EXTR_SKIP);
     require_once $path;
     
-    return ob_get_clean(); 
+     return ob_get_clean(); 
 }
 
 /*
@@ -104,13 +104,30 @@ function getHumanTimeUntilRateEnd($time) {
 * @param mixed $value
 * @param array $currentArray
 */
-function toPrintErrorInfo($value, $currentArray) {
+function printErrorInfoNotFound($value, $currentArray) {
     if (array_key_exists($value, $currentArray)) {
         return;
     }
 
     header('HTTP/1.1 404 Not Found');
-    print('Ошибка 404');
+    print("Ошибка 404. Страница не найдена");
+
+    die();
+}
+
+/*
+* Если сессия не активна, то выдаётся
+* ошибка 403 "Доступ запрещен"
+*
+* @param string $userAuth
+*/
+function printErrorInfoForbidden($userAuth) {   
+    if ($userAuth) {
+        return;
+    }
+
+    header('HTTP/1.1 403 Forbidden');
+    print("Ошибка 403. Доступ запрещен");
 
     die();
 }
@@ -125,11 +142,12 @@ function toPrintErrorInfo($value, $currentArray) {
 function validateFormFields($rules) {
     $errors = [];
     $specialSymbols = '/[\'|\"\||\<|\>|\[|\]|\!|\?|\$|\@|\#|\%|\^|\/|\\\|\&|\~|\*|\{|\}|\+|\:|\,|\;|\`|\=|\(|\)|\§|\°]/';
+    $specialSymbolEmail = '/[\@]/';
 
     foreach($rules as $key => $rule) {
         foreach($rule as $subRule) {           
             if (isset($_POST[$key])) {
-                if ($subRule === 'required' && $_POST[$key] == '') {
+                if ($subRule === 'required' && $_POST[$key] === '') {
                     $errors[$key][] = 'Поле не может быть пустым';
                 }          
                 if ($subRule === 'numeric' && !filter_var($_POST[$key], FILTER_VALIDATE_FLOAT)) {
@@ -147,7 +165,21 @@ function validateFormFields($rules) {
                     if (strtotime($_POST[$key]) < strtotime(date("d.m.Y", time()))) {
                         $errors[$key][] = 'Введенная дата меньше текущей: ' . date("d.m.Y", time());
                     } 
-                }                     
+                }  
+                if ($subRule === 'email') {
+                    if ($_POST[$key] === '') {
+                        $errors[$key][] = 'Введите e-mail';
+                    } else {
+                        if (!preg_match($specialSymbolEmail, $_POST[$key])) {
+                            $errors[$key][] = 'E-mail адрес введен не корректно';  
+                        } 
+                    }    
+                }     
+                if ($subRule === 'password') {
+                    if ($_POST[$key] === '') {
+                        $errors[$key][] = 'Введите пароль';
+                    } 
+                }            
             }  
             if (isset($_FILES[$key])) {     
                 if ($subRule === 'validateFile') {
@@ -215,5 +247,26 @@ function loadFileToServer($attributeValue) {
     }
 
     return $result; 
+}
+
+/*
+* Возвращает результат поиска пользователя
+* по e-mail адресу.
+*
+* @param string $email
+* @param string $users
+* @return NULL || string
+*/
+function searchUserByEmail($email, $users) {
+    $result = null;
+
+    foreach ($users as $user) {
+        if ($user['email'] == $email) {
+            $result = $user;
+            break;
+        }
+    }
+
+    return $result;
 }
 ?>

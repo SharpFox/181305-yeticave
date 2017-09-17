@@ -1,6 +1,10 @@
 <?php
+session_start();
+
 require_once('functions.php');
 require_once('data.php');
+
+printErrorInfoForbidden(isset($_SESSION['user']));
 
 $ValueOfAttributeName = 'add-img';
 $lotData = [];
@@ -8,33 +12,27 @@ $errors = [];
 $errorFileLoading = NULL;
 $rules = [
     'lot-name' => [
-        'required',
-        'validateFormFields'
+        'required'
     ],
     'category' => [
-        'required',        
-        'validateFormFields'
+        'required'
     ],
     'message' => [
         'required',
-        'validateFormFields'
     ],
     'lot-rate' => [
         'required',
         'numeric',
-        'notNegative',
-        'validateFormFields'
+        'notNegative'
     ],
     'lot-step' => [
         'required',
         'numeric',
-        'notNegative',
-        'validateFormFields'
+        'notNegative'
     ],
     'lot-date' => [
         'required',
-        'date',
-        'validateFormFields'
+        'date'
     ],
     'add-img' => [
         'validateFile',
@@ -54,10 +52,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
     foreach ($_POST as $postKey => $value) {
         $_POST[$postKey] = makeSymbolsLegal($_POST[$postKey]);  
     }
-}
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
     $errors = validateFormFields($rules);
+    
     if ($_POST['category'] === 'Выберите категорию') {
         $errors['category'][] = 'Не выбрана категория';
     }
@@ -89,7 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         'descriptionDefaulItem' => 0,
         'navigationMenu' => $navContent,
         'bets' => $bets,
-        'errorFileLoading' => $errorFileLoading
+        'errorFileLoading' => $errorFileLoading,
+        'isAuth' => isset($_SESSION['user'])
     ];
 
     $content = toRenderTemplate('lot.php', $lotVar);
@@ -103,14 +101,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
     $content = toRenderTemplate('add.php',  $addVar);
 }
 
+$userVar = [
+    'isAuth' => isset($_SESSION['user']),
+    'userName' => $_SESSION['user'],
+    'userAvatar' => $userAvatar
+];
+
+$userContent = toRenderTemplate('user-menu.php', $userVar);
+
 $layoutVar = [ 
     'content' => $content,
     'navigationMenu' => $navContent,
     'title' => 'Добавление лота',
     'isMainPage' => false,
-    'isAuth' => $isAuth,
-    'userName' => $userName,
-    'userAvatar' => $userAvatar
+    'userMenu' => $userContent
 ];
 
 $layoutContent = toRenderTemplate('layout.php', $layoutVar);

@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 require_once('functions.php');
 require_once('data.php');
 
@@ -24,14 +26,20 @@ $indexVar = [
 
 $indexContent = toRenderTemplate('index.php', $indexVar);
 
+$userVar = [
+    'isAuth' => isset($_SESSION['user']),
+    'userName' => $_SESSION['user'],
+    'userAvatar' => $userAvatar
+];
+
+$userContent = toRenderTemplate('user-menu.php', $userVar);
+
 $layoutVar = [ 
     'content' => $indexContent,
     'navigationMenu' => $navContent,
     'title' => 'Главная',
     'isMainPage' => true,
-    'isAuth' => $isAuth,
-    'userName' => $userName,
-    'userAvatar' => $userAvatar
+    'userMenu' => $userContent
 ];
 
 $layoutContent = toRenderTemplate('layout.php', $layoutVar);

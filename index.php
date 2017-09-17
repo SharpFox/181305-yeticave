@@ -2,13 +2,6 @@
 require_once('functions.php');
 require_once('data.php');
 
-date_default_timezone_set('Europe/Moscow');
-
-$lotTimeRemaining = "00:00";
-$tomorrow = strtotime('tomorrow midnight');
-$now = strtotime('now');
-$lotTimeRemaining = gmdate("H:i", ($tomorrow - $now));
-
 $navVar = ['goodsCategory' => $goodsCategory];
 $navContent = toRenderTemplate('nav.php', $navVar);
 
@@ -19,8 +12,7 @@ foreach ($goodsContent as $goodsContentKey => $product) {
 }
 
 $lotsItemVar = [
-    'goodsContent' => $goodsContent,
-    'lotTimeRemaining' => $lotTimeRemaining
+    'goodsContent' => $goodsContent
 ];
 
 $lotsItemContent = toRenderTemplate('lots-item.php', $lotsItemVar);

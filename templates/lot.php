@@ -13,7 +13,7 @@
         <div class="lot-item__right">
             <div class="lot-item__state">
                 <div class="lot-item__timer timer">
-                    <?=$goodsContent[$goodsItem]['rateEndTime']?>
+                    <?=$goodsContent[$goodsItem]['lotTimeRemaining']?>
                 </div>
                 <div class="lot-item__cost-state">
                     <div class="lot-item__rate">

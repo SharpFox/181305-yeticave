@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
             'url' => '/img/' . $_FILES['add-img']['name'],
             'description' => $_POST['message'],
             'step' => $_POST['lot-step'],
-            'rateEndTime' => getHumanTimeUntilRateEnd(strtotime($_POST['lot-date'] . ' 23:59:59'))
+            'lotTimeRemaining' => getHumanTimeUntilRateEnd(strtotime($_POST['lot-date'] . ' 23:59:59'))
         ]
     ];  
     

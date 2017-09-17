@@ -14,6 +14,18 @@ function makeSymbolsLegal($incomingData) {
 }
 
 /*
+* Возвращает время до окончания ставки
+*
+* @return string
+*/
+function getlotTimeRemaining() {
+    $tomorrow = strtotime('tomorrow midnight');
+    $now = strtotime('now');
+    
+    return gmdate("H:i", ($tomorrow - $now));   
+}
+
+/*
 * Возвращает результат сборки страницы.
 *
 * @param string $path

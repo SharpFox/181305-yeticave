@@ -2,6 +2,63 @@
 date_default_timezone_set('Europe/Moscow');
 
 /*
+* Запускает сессию.
+* Выкидывает исключение, если
+* сессия не стартовала.
+*/
+function startSession() {
+    if (!session_start()) {
+        header('HTTP/1.1 500 Internal Server Error');
+        print("Ошибка 500. Внутрення ошибка сервера");
+
+        throw "Не удалось открыть сессию. Обновите страницу.";
+    }
+}
+
+startSession();
+
+/*
+* Идентифицирует тип переданного данного и выполняет преобразования
+* содержимого согласно преобразованиям.
+*
+* @param any $incomingData
+* @return any
+*/
+function identifyTypeVarForlegalizationVarSymbols($incomingData){
+
+    if (gettype($incomingData) === 'boolean' || gettype($incomingData) === 'integer'
+        || gettype($incomingData) === 'double' || gettype($incomingData) === 'string') {
+        
+            return makeSymbolsLegal($incomingData);
+    }
+
+    if (gettype($incomingData) !== 'array') {
+        return $incomingData;
+    }
+  
+    $isMultiArray = (count($incomingData, COUNT_RECURSIVE) -  count($incomingData)) > 0 ? true : false;
+    $level = getLevelNesting($incomingData);  
+
+    //foreach($incomingData as $i => $value) {
+
+    //}
+    
+    if (!$isMultiArray) {
+        foreach($incomingData as $i => $value) {
+            $incomingData[$i] = makeSymbolsLegal($value);    
+        }     
+    } else {
+        foreach($incomingData as $i => $subIncomingData) {
+            foreach($subIncomingData as $j => $value) {
+                $incomingData[$i][$j] = makeSymbolsLegal($value);    
+            }
+        }       
+    }
+
+    return $incomingData;
+}
+
+/*
 * Возвращает результат преобразования специальных
 * символов в HTML-сущности, удаления пробелов слева справа.
 *  
@@ -11,6 +68,24 @@ date_default_timezone_set('Europe/Moscow');
 function makeSymbolsLegal($incomingData) {
     $incomingData = htmlspecialchars($incomingData);
     return trim($incomingData);
+}
+
+/*
+* Возвращает уровень вложенности массива.
+* 
+* @ param array incomingArray 
+* @return number
+*/
+function getLevelNesting($incomingArray) {
+    $level = 0;
+    $v = current($incomingArray);
+
+    while (is_array($v)) {
+         $level++;
+         $v = current($incomingArray);
+    }
+
+    return $level;
 }
 
 /*
@@ -33,6 +108,8 @@ function getlotTimeRemaining() {
 * @return string
 */
 function toRenderTemplate($path, $varArray) {
+
+    //$varArray = identifyTypeVarForlegalizationVarSymbols($varArray);
 
     $path = "templates/" . $path;
 
@@ -126,8 +203,9 @@ function printErrorInfoForbidden($userAuth) {
         return;
     }
 
-    header('HTTP/1.1 403 Forbidden');
-    print("Ошибка 403. Доступ запрещен");
+    //$accessDenied = "Ошибка 403. Доступ запрещен";
+    header("Location: login.php");    
+
 
     die();
 }
@@ -141,7 +219,6 @@ function printErrorInfoForbidden($userAuth) {
 */
 function validateFormFields($rules) {
     $errors = [];
-    $specialSymbols = '/[\'|\"\||\<|\>|\[|\]|\!|\?|\$|\@|\#|\%|\^|\/|\\\|\&|\~|\*|\{|\}|\+|\:|\,|\;|\`|\=|\(|\)|\§|\°]/';
     $specialSymbolEmail = '/[\@]/';
 
     foreach($rules as $key => $rule) {
@@ -190,11 +267,6 @@ function validateFormFields($rules) {
                         } 
                     }
                 }
-                if ($subRule === 'specialSymbols') {
-                    if (preg_match($specialSymbols, $_FILES[$key]['name'])) {
-                        $errors[$key][] = 'Имя файла должно содержать символы русского или латинского алфавитов, знак "_"';
-                    }
-                } 
             }
         }
     }
@@ -235,10 +307,10 @@ function validateFile($attributeValue) {
 */
 function loadFileToServer($attributeValue) {  
     $result = null;    
-    $fileName = $_FILES[$attributeValue]['name'];    
     $filePath = __DIR__ . '/img/';
-    $fileName =  strval(time()) . "_" . $fileName;
-    $_FILES[$attributeValue]['name'] = $fileName;
+    $fileInfo = pathinfo($_FILES[$attributeValue]['name']);
+    $fileName = $fileInfo['filename'] . "_" . strval(time()) . "." . $fileInfo['extension'];    
+    $_FILES[$attributeValue]['name'] = $fileName; 
 
     try {
         move_uploaded_file($_FILES[$attributeValue]['tmp_name'], $filePath . $fileName);
@@ -268,5 +340,25 @@ function searchUserByEmail($email, $users) {
     }
 
     return $result;
+}
+
+/*
+* Возвращает массив с данными пользователя,
+* таковой авторизован.
+*
+* @param string $userAvatar
+* @return array
+*/
+function getUserMenuVar($userAvatar) {
+    $userVar = NULL;
+    $sessionOpen = isset($_SESSION['user']);
+    
+    $userVar = [
+        'isAuth' => $sessionOpen,
+        'userName' => $sessionOpen ? $_SESSION['user'] : '',
+        'userAvatar' => $sessionOpen ? $userAvatar : ''
+    ];
+
+    return $userVar;
 }
 ?>

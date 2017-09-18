@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 header('Content-Type: text/html; charset=utf-8');
 
 require_once('functions.php');
@@ -27,13 +25,7 @@ $lotVar = [
 
 $lotContent = toRenderTemplate('lot.php', $lotVar);
 
-$userVar = [
-    'isAuth' => isset($_SESSION['user']),
-    'userName' => $_SESSION['user'],
-    'userAvatar' => $userAvatar
-];
-
-$userContent = toRenderTemplate('user-menu.php', $userVar);
+$userContent = toRenderTemplate('user-menu.php', getUserMenuVar($userAvatar));
 
 $layoutVar = [ 
     'content' => $lotContent,

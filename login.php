@@ -15,6 +15,8 @@ $rules = [
     ]
 ];
 
+$accessDenied;
+
 $navVar = ['goodsCategory' => $goodsCategory];
 $navContent = toRenderTemplate('nav.php', $navVar);
 
@@ -57,14 +59,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
     $content = toRenderTemplate('login.php', $loginVar);
 }
 
+$userContent = toRenderTemplate('user-menu.php', getUserMenuVar($userAvatar));
+
 $layoutVar = [ 
     'content' => $content,
     'navigationMenu' => $navContent,
     'title' => 'Добавление лота',
     'isMainPage' => false,
-    'isAuth' => $isAuth,
-    'userName' => $userName,
-    'userAvatar' => $userAvatar
+    'userMenu' => $userContent
 ];
 
 $layoutContent = toRenderTemplate('layout.php', $layoutVar);

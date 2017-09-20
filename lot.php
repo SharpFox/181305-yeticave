@@ -4,13 +4,20 @@ header('Content-Type: text/html; charset=utf-8');
 require_once('functions.php');
 require_once('data.php');
 
+identifyTypeVarForlegalizationVarSymbols($goodsCategory);
+identifyTypeVarForlegalizationVarSymbols($goodsContent);
+identifyTypeVarForlegalizationVarSymbols($lotDefaultDescription);
+identifyTypeVarForlegalizationVarSymbols($defaultRateEndTime);
+
 $goodsItem = isset($_GET['id']) ? $_GET['id'] : null;
+
 printErrorInfoNotFound($goodsItem, $goodsContent);
 
-$navVar = ['goodsCategory' => $goodsCategory];
-$navContent = toRenderTemplate('nav.php', $navVar);
-
+$title = $goodsContent[$goodsItem]['name'];
+$isMainPage = false;
 $descriptionDefaulItem = 0;
+
+$navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
 
 $lotVar = [ 
     'goodsContent' => $goodsContent,
@@ -23,19 +30,8 @@ $lotVar = [
     'isAuth' => isset($_SESSION['user'])
 ];
 
-$lotContent = toRenderTemplate('lot.php', $lotVar);
-
-$userContent = toRenderTemplate('user-menu.php', getUserMenuVar($userAvatar));
-
-$layoutVar = [ 
-    'content' => $lotContent,
-    'navigationMenu' => $navContent,
-    'title' => $goodsContent[$goodsItem]['name'],
-    'isMainPage' => false,
-    'userMenu' => $userContent
-];
-
-$layoutContent = toRenderTemplate('layout.php', $layoutVar);
+$lotContent = renderTemplate('lot.php', $lotVar);
+$layoutContent = renderLayout($lotContent, $navContent, $title, $isMainPage, $userAvatar);
     
 print($layoutContent);
 ?>

@@ -1,64 +1,86 @@
 <?php 
 date_default_timezone_set('Europe/Moscow');
 
-/*
-* Запускает сессию.
-* Выкидывает исключение, если
-* сессия не стартовала.
+/**
+* Запускает сессию. Выкидывает исключение и,
+* выводит информацию об ошибке, если сессия не стартовала.
 */
 function startSession() {
-    if (!session_start()) {
-        header('HTTP/1.1 500 Internal Server Error');
-        print("Ошибка 500. Внутрення ошибка сервера");
-
-        throw "Не удалось открыть сессию. Обновите страницу.";
+    if (session_start()) {
+        return;
     }
+
+    header('HTTP/1.1 500 Internal Server Error');
+    print("Ошибка 500. Внутрення ошибка сервера");
+
+    throw "Не удалось открыть сессию. Обновите страницу.";
 }
 
 startSession();
 
-/*
+/**
+* Формирует конечную версию html-страницы.
+*
+* @param string $mainContent
+* @param string $title
+* @param boolean $isMainPage
+* @param array $goodsCategory
+* @param string $userAvatar
+* @return string
+*/
+function renderLayout($mainContent, $navContent, $title, $isMainPage, $userAvatar) {
+    
+    $layoutVar = [ 
+        'content' => $mainContent,
+        'navigationMenu' => $navContent,
+        'title' => $title,
+        'isMainPage' => $isMainPage,
+        'userMenu' => renderTemplate('user-menu.php', getUserMenuVar($userAvatar))
+    ];
+    
+    return renderTemplate('layout.php', $layoutVar);
+}
+
+/**
 * Идентифицирует тип переданного данного и выполняет преобразования
 * содержимого согласно преобразованиям.
 *
 * @param any $incomingData
-* @return any
 */
-function identifyTypeVarForlegalizationVarSymbols($incomingData){
+function identifyTypeVarForlegalizationVarSymbols(&$incomingData) {
 
     if (gettype($incomingData) === 'boolean' || gettype($incomingData) === 'integer'
         || gettype($incomingData) === 'double' || gettype($incomingData) === 'string') {
         
-            return makeSymbolsLegal($incomingData);
+            makeSymbolsLegal($incomingData);
+
+            return;
     }
 
-    if (gettype($incomingData) !== 'array') {
-        return $incomingData;
-    }
-  
-    $isMultiArray = (count($incomingData, COUNT_RECURSIVE) -  count($incomingData)) > 0 ? true : false;
-    $level = getLevelNesting($incomingData);  
-
-    //foreach($incomingData as $i => $value) {
-
-    //}
-    
-    if (!$isMultiArray) {
-        foreach($incomingData as $i => $value) {
-            $incomingData[$i] = makeSymbolsLegal($value);    
-        }     
-    } else {
-        foreach($incomingData as $i => $subIncomingData) {
-            foreach($subIncomingData as $j => $value) {
-                $incomingData[$i][$j] = makeSymbolsLegal($value);    
-            }
-        }       
-    }
-
-    return $incomingData;
+    if (gettype($incomingData) === 'array') {
+        $editArr = getRoundArray($incomingData);
+    }     
 }
 
-/*
+/**
+* Рекурсивно обходит массив и редактирует
+* символы, если это необходимо.
+*
+* @param $arr 
+*/
+function getRoundArray(& $arr) {
+    $editArr = [];
+    foreach ($arr as $key => $value) {
+        if(is_array($value)) {
+            getRoundArray($value);
+        } else {
+            $editArr[$key] = makeSymbolsLegal($value);
+        }
+    }
+    return $editArr;
+}
+
+/**
 * Возвращает результат преобразования специальных
 * символов в HTML-сущности, удаления пробелов слева справа.
 *  
@@ -66,26 +88,7 @@ function identifyTypeVarForlegalizationVarSymbols($incomingData){
 * @return string
 */
 function makeSymbolsLegal($incomingData) {
-    $incomingData = htmlspecialchars($incomingData);
-    return trim($incomingData);
-}
-
-/*
-* Возвращает уровень вложенности массива.
-* 
-* @ param array incomingArray 
-* @return number
-*/
-function getLevelNesting($incomingArray) {
-    $level = 0;
-    $v = current($incomingArray);
-
-    while (is_array($v)) {
-         $level++;
-         $v = current($incomingArray);
-    }
-
-    return $level;
+    return trim(htmlspecialchars($incomingData));
 }
 
 /*
@@ -94,22 +97,19 @@ function getLevelNesting($incomingArray) {
 * @return string
 */
 function getlotTimeRemaining() {
-    $tomorrow = strtotime('tomorrow midnight');
-    $now = strtotime('now');
-    
-    return gmdate("H:i", ($tomorrow - $now));   
+    return gmdate("H:i", (strtotime('tomorrow midnight') - strtotime('now')));   
 }
 
-/*
+/**
 * Возвращает результат сборки страницы.
 *
 * @param string $path
 * @param array $varArray
 * @return string
 */
-function toRenderTemplate($path, $varArray) {
+function renderTemplate($path, $varArray) {
 
-    //$varArray = identifyTypeVarForlegalizationVarSymbols($varArray);
+    //identifyTypeVarForlegalizationVarSymbols($varArray);
 
     $path = "templates/" . $path;
 
@@ -121,10 +121,10 @@ function toRenderTemplate($path, $varArray) {
     extract($varArray, EXTR_SKIP);
     require_once $path;
     
-     return ob_get_clean(); 
+    return ob_get_clean(); 
 }
 
-/*
+/**
 * Возвращает время последней сделанной ставки 
 * в относительном формате.
 *
@@ -149,7 +149,7 @@ function getHumanTimeOfLastRate($time) {
     return date('i', $time) . ' минут назад';
 }
 
-/*
+/**
 * Возвращает время до окончания возможности
 * делать ставки в относительном формате.
 *
@@ -174,7 +174,7 @@ function getHumanTimeUntilRateEnd($time) {
     return date('i', $time) . ' минут';
 }
 
-/*
+/**
 * Выводит на экран информацию об ошибке в случае,
 * если указанный ключ или индекс отсутствуют в массиве.
 *
@@ -182,45 +182,34 @@ function getHumanTimeUntilRateEnd($time) {
 * @param array $currentArray
 */
 function printErrorInfoNotFound($value, $currentArray) {
-    if (array_key_exists($value, $currentArray)) {
-        return;
+    if (!array_key_exists($value, $currentArray)) {
+        header('HTTP/1.1 404 Not Found');
+        print("Ошибка 404. Страница не найдена");    
+        die();
     }
-
-    header('HTTP/1.1 404 Not Found');
-    print("Ошибка 404. Страница не найдена");
-
-    die();
 }
 
-/*
+/**
 * Если сессия не активна, то выдаётся
 * ошибка 403 "Доступ запрещен"
 *
-* @param string $userAuth
+* @param boolean $userAuth
 */
 function printErrorInfoForbidden($userAuth) {   
-    if ($userAuth) {
-        return;
+    if (!$userAuth) {
+        header("Location: login.php"); 
+        die();
     }
-
-    //$accessDenied = "Ошибка 403. Доступ запрещен";
-    header("Location: login.php");    
-
-
-    die();
 }
 
-/*
+/**
 * Выполняет проверку введённых данных
 * на форму согласно переданным правилам.
 * 
 * @param array $rules
-* @return array
+* @link array $errors
 */
-function validateFormFields($rules) {
-    $errors = [];
-    $specialSymbolEmail = '/[\@]/';
-
+function validateFormFields($rules, &$errors) {
     foreach($rules as $key => $rule) {
         foreach($rule as $subRule) {           
             if (isset($_POST[$key])) {
@@ -230,51 +219,40 @@ function validateFormFields($rules) {
                 if ($subRule === 'numeric' && !filter_var($_POST[$key], FILTER_VALIDATE_FLOAT)) {
                     $errors[$key][] = 'Данные не соответствуют типу Число';
                 } 
-                if ($subRule === 'notNegative' && filter_var($_POST[$key], FILTER_VALIDATE_FLOAT)) {
-                    if ($_POST[$key] < 0) {
-                        $errors[$key][] = 'Значение не может быть отрицательным';
-                    }
+                if ($subRule === 'notNegative' && filter_var($_POST[$key], FILTER_VALIDATE_FLOAT) && $_POST[$key] < 0) {
+                    $errors[$key][] = 'Значение не может быть отрицательным';
                 } 
-                if ($subRule === 'date') {
-                    if (date("d.m.Y", strtotime($_POST[$key])) !== $_POST[$key]) {
-                        $errors[$key][] = 'Дата введена в неверном формате';
-                    } 
-                    if (strtotime($_POST[$key]) < strtotime(date("d.m.Y", time()))) {
-                        $errors[$key][] = 'Введенная дата меньше текущей: ' . date("d.m.Y", time());
-                    } 
+                if ($subRule === 'date' && date("d.m.Y", strtotime($_POST[$key])) !== $_POST[$key]) {
+                    $errors[$key][] = 'Дата введена в неверном формате';
+                } 
+                if ($subRule === 'date' && strtotime($_POST[$key]) < strtotime(date("d.m.Y", time()))) {
+                    $errors[$key][] = 'Введенная дата меньше текущей: ' . date("d.m.Y", time());
                 }  
-                if ($subRule === 'email') {
-                    if ($_POST[$key] === '') {
-                        $errors[$key][] = 'Введите e-mail';
-                    } else {
-                        if (!preg_match($specialSymbolEmail, $_POST[$key])) {
-                            $errors[$key][] = 'E-mail адрес введен не корректно';  
-                        } 
-                    }    
+                if ($subRule === 'email' && $_POST[$key] === '') {
+                    $errors[$key][] = 'Введите e-mail';
+                }
+                if ($subRule === 'email' && $_POST[$key] !== '' && !filter_var($_POST[$key], FILTER_VALIDATE_EMAIL)) {
+                    $errors[$key][] = 'E-mail адрес введен не корректно';  
                 }     
-                if ($subRule === 'password') {
-                    if ($_POST[$key] === '') {
-                        $errors[$key][] = 'Введите пароль';
-                    } 
+                if ($subRule === 'password' && $_POST[$key] === '') {
+                    $errors[$key][] = 'Введите пароль';
                 }            
             }  
             if (isset($_FILES[$key])) {     
-                if ($subRule === 'validateFile') {
-                    if (isset($_FILES[$key]['name']) || !empty($_FILES[$key]['name'])) {
-                        $result = call_user_func($subRule, $key);
-                        if ($result !== NULL) {
-                            $errors[$key][] = $result;    
-                        } 
+                if ($subRule === 'validateFile' && isset($_FILES[$key]['name'])) {
+                    $result  = call_user_func($subRule, $key);
+                        
+                    if ($result !== NULL) {
+                        $errors[$key][] = $result;    
                     }
                 }
             }
         }
     }
-    return $errors;
 }
 
-/*
-* Проверяет файл на ряд заданных параметров:
+/**
+* Проверяет файл.
 *
 * @param string $attributeValue
 * @return null || string
@@ -292,6 +270,7 @@ function validateFile($attributeValue) {
     if ($type !== 'image/jpeg') {
         $result = 'Загрузите картинку в формате jpeg';   
     }
+
     if ($_FILES[$attributeValue]['size'] > $maxSize) {
         $result = empty($result) ? 'Максимальный размер файла: 1 мб' : $result .= $result . '. Максимальный размер файла: 1 мб';   
     }
@@ -299,7 +278,7 @@ function validateFile($attributeValue) {
     return $result;
 }
 
-/*
+/**
 * Загружает файл на сервер.
 *
 * @param string attributeValue
@@ -321,7 +300,7 @@ function loadFileToServer($attributeValue) {
     return $result; 
 }
 
-/*
+/**
 * Возвращает результат поиска пользователя
 * по e-mail адресу.
 *
@@ -342,7 +321,7 @@ function searchUserByEmail($email, $users) {
     return $result;
 }
 
-/*
+/**
 * Возвращает массив с данными пользователя,
 * таковой авторизован.
 *
@@ -350,7 +329,6 @@ function searchUserByEmail($email, $users) {
 * @return array
 */
 function getUserMenuVar($userAvatar) {
-    $userVar = NULL;
     $sessionOpen = isset($_SESSION['user']);
     
     $userVar = [
@@ -360,5 +338,46 @@ function getUserMenuVar($userAvatar) {
     ];
 
     return $userVar;
+}
+
+/**
+* Выполняет авторизацию пользователя.
+* 
+* @param array $user
+* @link array $errors
+* @param string $nameKeyEmail
+* @param string $nameKeyPassword
+* @param string $nameKeyUserName
+*/
+function authorizeUser($users, &$errors, $nameKeyEmail, $nameKeyPassword, $nameKeyUserName) {
+    
+    if (!key_exists($nameKeyEmail, $_POST)) {
+        $errors[$nameKeyEmail][] = 'Не найдено свойство ' . $nameKeyEmail . '. Обратитесь в тех. поддержку';
+    }
+
+    if (!key_exists($nameKeyPassword, $_POST)) {
+        $errors[$nameKeyPassword][] = 'Не найдено свойство ' . $nameKeyPassword . '. Обратитесь в тех. поддержку';
+        
+        return;    
+    }
+
+    $user = searchUserByEmail($_POST[$nameKeyEmail], $users);
+
+    if ($user === NULL) {
+        $errors[$nameKeyEmail][] = 'Пользователь с введённым e-mail адресом не зарегистрирован';
+
+        return;
+    }
+
+    if (!password_verify($_POST[$nameKeyPassword], $user[$nameKeyPassword])) {
+        $errors['password'][] = 'Вы ввели неверный пароль';
+
+        return;
+    } 
+
+    $_SESSION['user'] = $user[$nameKeyUserName];
+    header("Location: index.php");
+
+    return;
 }
 ?>

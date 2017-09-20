@@ -2,33 +2,22 @@
 require_once('functions.php');
 require_once('data.php');
 
-$navVar = ['goodsCategory' => $goodsCategory];
-$navContent = toRenderTemplate('nav.php', $navVar);
+$title = 'Главная';
+$isMainPage = true;
 
-$lotsItemVar = [
-    'goodsContent' => $goodsContent
-];
+identifyTypeVarForlegalizationVarSymbols($goodsCategory);
+identifyTypeVarForlegalizationVarSymbols($goodsContent);
 
-$lotsItemContent = toRenderTemplate('lots-item.php', $lotsItemVar);
+$navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
+$lotsItemContent = renderTemplate('lots-item.php', ['goodsContent' => $goodsContent]); 
 
 $indexVar = [ 
     'goodsCategory' => $goodsCategory,
     'lotsItemContent' => $lotsItemContent    
 ];
 
-$indexContent = toRenderTemplate('index.php', $indexVar);
+$indexContent = renderTemplate('index.php', $indexVar);
+$layoutContent = renderLayout($indexContent, $navContent, $title, $isMainPage, $userAvatar);
 
-$userContent = toRenderTemplate('user-menu.php', getUserMenuVar($userAvatar));
-
-$layoutVar = [ 
-    'content' => $indexContent,
-    'navigationMenu' => $navContent,
-    'title' => 'Главная',
-    'isMainPage' => true,
-    'userMenu' => $userContent
-];
-
-$layoutContent = toRenderTemplate('layout.php', $layoutVar);
-    
 print($layoutContent);
 ?>

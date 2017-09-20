@@ -1,10 +1,8 @@
 <?php 
 date_default_timezone_set('Europe/Moscow');
 
-//$isAuth = (bool) rand(0, 1);
-//$userName = 'Константин';
 $userAvatar = 'img/user.jpg';
-$isAuth = false;
+//$isAuth = false;
 
 $goodsCategory = ['Доски и лыжи','Крепления','Ботинки','Одежда','Инструменты','Разное'];
 
@@ -19,7 +17,7 @@ $defaultRateEndTime = '15:28';
 
 $goodsContent = [
     [
-        'name' => "2014 Rossignol District Snowboard",
+        'name' => "2014 Rossignol District Snowboard<html>",
         'category' => 'Доски и лыжи',
         'cost' => 10999,
         'url' => 'img/lot-1.jpg',

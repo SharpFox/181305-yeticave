@@ -104,9 +104,6 @@ function getlotTimeRemaining() {
 * @return string
 */
 function renderTemplate($path, $varArray) {
-
-    //identifyTypeVarForlegalizationVarSymbols($varArray);
-
     $path = "templates/" . $path;
 
     if (!file_exists($path)) {
@@ -128,17 +125,13 @@ function renderTemplate($path, $varArray) {
 * @return string
 */
 function getHumanTimeOfLastRate($time) {
-    
-    $oneDay = 86400;
-    $oneHour = 3600;
-    
     $time = time() - $time; 
     
-    if ($time >= $oneDay) {
+    if ($time >= DAY_SECONDS) {
         return date('d.m.y \в H:i', $time);
     }
     
-    if ($time < $oneDay && $time >= $oneHour) {
+    if ($time < DAY_SECONDS && $time >= HOUR_SECONDS) {
         return  date('h', $time) . ' часов назад';
     }
     
@@ -153,17 +146,13 @@ function getHumanTimeOfLastRate($time) {
 * @return string
 */
 function getHumanTimeUntilRateEnd($time) {
-    
-    $oneDay = 86400;
-    $oneHour = 3600;
-    
     $time = $time - time(); 
     
-    if ($time >= $oneDay) {
+    if ($time >= DAY_SECONDS) {
         return date('j', $time) . ' дня';
     }
     
-    if ($time < $oneDay && $time >= $oneHour) {
+    if ($time < DAY_SECONDS && $time >= HOUR_SECONDS) {
         return  date('G', $time) . ' часов';
     }
     

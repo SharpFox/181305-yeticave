@@ -18,7 +18,7 @@ $defaultRateEndTime = '15:28';
 
 $goodsContent = [
     [
-        'name' => "2014 Rossignol District Snowboard<html>",
+        'name' => "2014 Rossignol District Snowboard",
         'category' => 'Доски и лыжи',
         'cost' => 10999,
         'url' => 'img/lot-1.jpg',

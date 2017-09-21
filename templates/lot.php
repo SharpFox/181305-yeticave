@@ -30,7 +30,9 @@
                         <label for="cost">Ваша ставка</label>
                         <input id="cost" type="number" step="<?=$goodsContent[$goodsItem]['step']?>" value="<?=$goodsContent[$goodsItem]['cost']?>" name="cost" placeholder="<?=$goodsContent[$goodsItem]['cost']?>">
                     </p>
+                    <?php if (!$isBetMade):?>
                     <button type="submit" class="button">Сделать ставку</button>
+                    <?php endif; ?>
                 </form>
             </div>
             <?php endif; ?>

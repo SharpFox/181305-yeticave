@@ -4,7 +4,7 @@
     <h2>Мои ставки</h2>
     <table class="rates__list">
     <?php foreach ($ratedContent as $key => $value): ?>
-      <tr class="rates__item rates__item--win">
+      <tr class="rates__item">
         <td class="rates__info">
           <div class="rates__img">
             <img src=<?=$value['url'];?> width="54" height="40" alt=<?=$value['category'];?>>
@@ -16,14 +16,16 @@
         <td class="rates__category">
             <?=$value['category'];?>
         </td>
-        <td class="rates__timer">
-          <div class="timer timer--win">Ставка выиграла</div>
+        <td class="rates__timer">        
+          <div class="timer timer--finishing">
+               <?=date('H:i:s', strtotime($value['lotTimeRemaining']))?>
+          </div>
         </td>
         <td class="rates__price">
-            <?=$value['cost'];?>
+            <?=number_format($value['cost'], 0, '.', ' ') . ' р';?>
         </td>
         <td class="rates__time">
-          <?=gmdate(strtotime('now') - $value['lotTimeRemaining']);?>
+          <?=getHumanTimeUntilRateEnd($value['timeBetting']);?>
         </td>
       </tr>  
       <?php endforeach; ?>    

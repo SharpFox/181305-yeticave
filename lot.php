@@ -11,9 +11,16 @@ identifyTypeVarForlegalizationVarSymbols($defaultRateEndTime);
 
 $goodsItem = isset($_GET['id']) ? $_GET['id'] : null;
 $user_bets = [];
+$isBetMade = false;
 
 if (isset($_COOKIE['bets'])) {
     $user_bets = json_decode($_COOKIE['bets'], true);
+
+    foreach($user_bets as $key=> $value) {
+        if ($user_bets[$key]['goodsItem'] === $goodsItem) { 
+            $isBetMade = true;
+        }
+    }    
 }
 
 printErrorInfoNotFound($goodsItem, $goodsContent);
@@ -31,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'category' => $goodsContent[$goodsItem]['category'],
         'cost' => $_POST['cost'],
         'url' => $goodsContent[$goodsItem]['url'],
+        'timeBetting' => time(),
         'lotTimeRemaining' => $goodsContent[$goodsItem]['lotTimeRemaining']
     ];
 
@@ -51,6 +59,7 @@ $lotVar = [
     'lotDescription' => $lotDefaultDescription,
     'descriptionDefaulItem' => $descriptionDefaulItem,
     'rateEndTime' => $defaultRateEndTime,
+    'isBetMade' => $isBetMade,
     'isAuth' => isset($_SESSION['user'])
 ];
 

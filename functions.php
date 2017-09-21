@@ -47,18 +47,17 @@ function renderLayout($mainContent, $navContent, $title, $isMainPage, $userAvata
 *
 * @param any $incomingData
 */
-function identifyTypeVarForlegalizationVarSymbols(&$incomingData) {
+function identifyTypeVarForlegalizationVarSymbols(& $incomingData) {
 
     if (gettype($incomingData) === 'boolean' || gettype($incomingData) === 'integer'
-        || gettype($incomingData) === 'double' || gettype($incomingData) === 'string') {
-        
+        || gettype($incomingData) === 'double' || gettype($incomingData) === 'string') {        
             makeSymbolsLegal($incomingData);
 
             return;
     }
 
     if (gettype($incomingData) === 'array') {
-        $editArr = getRoundArray($incomingData);
+        getRoundArray($incomingData);
     }     
 }
 
@@ -66,29 +65,26 @@ function identifyTypeVarForlegalizationVarSymbols(&$incomingData) {
 * Рекурсивно обходит массив и редактирует
 * символы, если это необходимо.
 *
-* @param $arr 
+* @param array $arr 
 */
 function getRoundArray(& $arr) {
-    $editArr = [];
     foreach ($arr as $key => $value) {
         if(is_array($value)) {
             getRoundArray($value);
         } else {
-            $editArr[$key] = makeSymbolsLegal($value);
+             makeSymbolsLegal($arr[$key]);
         }
     }
-    return $editArr;
 }
 
 /**
-* Возвращает результат преобразования специальных
-* символов в HTML-сущности, удаления пробелов слева справа.
+* Преобразует специальные символы
+* в HTML-сущности, удаляет пробелов слева справа.
 *  
-* @param $incomingData
-* @return string
+* @param any $incomingData
 */
-function makeSymbolsLegal($incomingData) {
-    return trim(htmlspecialchars($incomingData));
+function makeSymbolsLegal(& $incomingData) {
+    $incomingData = trim(htmlspecialchars($incomingData));
 }
 
 /*
@@ -185,7 +181,8 @@ function printErrorInfoNotFound($value, $currentArray) {
     if (!array_key_exists($value, $currentArray)) {
         header('HTTP/1.1 404 Not Found');
         print("Ошибка 404. Страница не найдена");    
-        die();
+        
+        exit();
     }
 }
 
@@ -198,7 +195,8 @@ function printErrorInfoNotFound($value, $currentArray) {
 function printErrorInfoForbidden($userAuth) {   
     if (!$userAuth) {
         header("Location: login.php"); 
-        die();
+        
+        exit();
     }
 }
 

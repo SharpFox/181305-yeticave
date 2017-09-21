@@ -10,8 +10,7 @@
             <img src=<?=$value['url'];?> width="54" height="40" alt=<?=$value['category'];?>>
           </div>
           <div>
-            <h3 class="rates__title"><a href="lot.php?id=<?= $key;?>"><?=$value['name'];?></a></h3>
-            <!--<p>Телефон +7 900 667-84-48, Скайп: Vlas92. Звонить с 14 до 20</p>-->
+            <h3 class="rates__title"><a href="lot.php?id=<?=$value['goodsItem'];?>"><?=$value['name'];?></a></h3>
           </div>
         </td>
         <td class="rates__category">
@@ -24,10 +23,7 @@
             <?=$value['cost'];?>
         </td>
         <td class="rates__time">
-        <?php
-            $currentTime = strtotime('now');
-            $reteData = gmdate($currentTime - $rate['data']) ?>
-            <?= timeFormat($reteData); ?>
+          <?=gmdate(strtotime('now') - $value['lotTimeRemaining']);?>
         </td>
       </tr>  
       <?php endforeach; ?>    

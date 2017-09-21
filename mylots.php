@@ -8,17 +8,20 @@ printErrorInfoForbidden(isset($_SESSION['user']));
 
 $title = 'Мои ставки';
 $isMainPage = false;
+$ratedContent = [];
 
 identifyTypeVarForlegalizationVarSymbols($goodsCategory);
 identifyTypeVarForlegalizationVarSymbols($goodsContent);
 
 $navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
 
-if(isset($_COOKIE['lot-data'])) {
-    $ratesList = json_decode($_COOKIE['lot-data'], true);
+if(isset($_COOKIE['bets'])) {
+    $ratedContent = json_decode($_COOKIE['bets'], true);
 }
-$mylotsVar = [
-    
+
+$mylotsVar = [ 
+    'ratedContent' => $ratedContent,
+    'navigationMenu' => $navContent
 ];
 
 $mylotsContent = renderTemplate('mylots.php', $mylotsVar);

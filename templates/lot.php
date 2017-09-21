@@ -25,7 +25,7 @@
                         Мин. ставка <span><?=$goodsContent[$goodsItem]['cost']?></span>
                     </div>
                 </div>
-                <form class="lot-item__form" action="mylots.php" method="post">
+                <form class="lot-item__form" action="lot.php?id=<?=$goodsItem;?>" method="post">
                     <p class="lot-item__form-item">
                         <label for="cost">Ваша ставка</label>
                         <input id="cost" type="number" step="<?=$goodsContent[$goodsItem]['step']?>" value="<?=$goodsContent[$goodsItem]['cost']?>" name="cost" placeholder="<?=$goodsContent[$goodsItem]['cost']?>">

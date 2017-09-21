@@ -26,6 +26,7 @@ CREATE TABLE lots (
   description 		TEXT(600) 		NOT NULL,
   timeRemaining 	DATETIME 		  NOT NULL,
   step 				    INT UNSIGNED 	NOT NULL,
+  quantityBets    INT UNSIGNED  NOT NULL,
   authorId 		    INT UNSIGNED,
   winnerId 		    INT UNSIGNED
 );

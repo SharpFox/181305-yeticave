@@ -1,10 +1,10 @@
 <?php 
 date_default_timezone_set('Europe/Moscow');
 
-//$isAuth = (bool) rand(0, 1);
-//$userName = 'Константин';
 $userAvatar = 'img/user.jpg';
-$isAuth = false;
+
+define("DAY_SECONDS", 86400);
+define("HOUR_SECONDS", 3600);
 
 $goodsCategory = ['Доски и лыжи','Крепления','Ботинки','Одежда','Инструменты','Разное'];
 
@@ -15,7 +15,6 @@ $lotDefaultDescription = 'Легкий маневренный сноуборд, 
                           просто посмотрите на Вашу доску и улыбнитесь, крутая графика от Шона Кливера еще никого не оставляла равнодушным.';
 $defaultStep = 1;
 $defaultRateEndTime = '15:28';
-
 
 $goodsContent = [
     [

@@ -25,12 +25,14 @@
                         Мин. ставка <span><?=$goodsContent[$goodsItem]['cost']?></span>
                     </div>
                 </div>
-                <form class="lot-item__form" action="https://echo.htmlacademy.ru" method="post">
+                <form class="lot-item__form" action="lot.php?id=<?=$goodsItem;?>" method="post">
                     <p class="lot-item__form-item">
                         <label for="cost">Ваша ставка</label>
                         <input id="cost" type="number" step="<?=$goodsContent[$goodsItem]['step']?>" value="<?=$goodsContent[$goodsItem]['cost']?>" name="cost" placeholder="<?=$goodsContent[$goodsItem]['cost']?>">
                     </p>
+                    <?php if (!$isBetMade):?>
                     <button type="submit" class="button">Сделать ставку</button>
+                    <?php endif; ?>
                 </form>
             </div>
             <?php endif; ?>

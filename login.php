@@ -3,6 +3,13 @@ require_once('functions.php');
 require_once('data.php');
 require_once('userdata.php');
 
+$title = 'Вход';
+$isMainPage = false;
+
+$nameKeyEmail  = 'email';
+$nameKeyPassword = 'password';
+$nameKeyUserName = 'name';
+
 $errors = [];
 $rules = [
     'email' => [
@@ -15,59 +22,34 @@ $rules = [
     ]
 ];
 
-$navVar = ['goodsCategory' => $goodsCategory];
-$navContent = toRenderTemplate('nav.php', $navVar);
+identifyTypeVarForlegalizationVarSymbols($goodsCategory);
+identifyTypeVarForlegalizationVarSymbols($goodsContent);
+
+if (!empty($_POST)) {
+    identifyTypeVarForlegalizationVarSymbols($_POST);
+}
+
+$navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
-    foreach ($_POST as $postKey => $value) {
-        $_POST[$postKey] = makeSymbolsLegal($_POST[$postKey]);  
-    }
-
-    $errors = validateFormFields($rules);
+    validateFormFields($rules, $errors);
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {    
-    session_start();
-    
-    $user = searchUserByEmail($_POST['email'], $users);
-
-    if ($user !== NULL) {
-        if (password_verify($_POST['password'], $user['password'])) {
-            $_SESSION['user'] = $user['name'];
-            header("Location: index.php");
-        } else {
-            $errors['password'][] = 'Вы ввели неверный пароль';
-        }
-    } 
-    else {
-        $errors['email'][] = 'Пользователь с введённым e-mail адресом не зарегистрирован';     
-    }
-    $loginVar = [
-        'errors' => $errors,
-        'navigationMenu' => $navContent
-    ];    
-
-    $content = toRenderTemplate('login.php', $loginVar);   
-} else {
-    $loginVar = [
-        'errors' => $errors,
-        'navigationMenu' => $navContent
-    ];     
-
-    $content = toRenderTemplate('login.php', $loginVar);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST[$nameKeyEmail])) {
+    $user = searchUserByEmail($_POST[$nameKeyEmail], $users);
 }
 
-$layoutVar = [ 
-    'content' => $content,
-    'navigationMenu' => $navContent,
-    'title' => 'Добавление лота',
-    'isMainPage' => false,
-    'isAuth' => $isAuth,
-    'userName' => $userName,
-    'userAvatar' => $userAvatar
-];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) { 
+    authorizeUser($users, $errors, $nameKeyEmail, $nameKeyPassword, $nameKeyUserName); 
+}  
 
-$layoutContent = toRenderTemplate('layout.php', $layoutVar);
+$loginVar = [
+    'errors' => $errors,
+    'navigationMenu' => $navContent
+];    
+
+$loginContent = renderTemplate('login.php', $loginVar);
+$layoutContent = renderLayout($loginContent, $navContent, $title, $isMainPage, $userAvatar);
     
 print($layoutContent);
 ?>

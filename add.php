@@ -1,15 +1,14 @@
 <?php
-session_start();
-
 require_once('functions.php');
 require_once('data.php');
 
 printErrorInfoForbidden(isset($_SESSION['user']));
 
+$title = 'Добавление лота';
+$isMainPage = false;
 $ValueOfAttributeName = 'add-img';
-$lotData = [];
+
 $errors = [];
-$errorFileLoading = NULL;
 $rules = [
     'lot-name' => [
         'required'
@@ -40,8 +39,17 @@ $rules = [
     ]
 ];
 
-$navVar = ['goodsCategory' => $goodsCategory];
-$navContent = toRenderTemplate('nav.php', $navVar);
+identifyTypeVarForlegalizationVarSymbols($goodsCategory);
+identifyTypeVarForlegalizationVarSymbols($goodsContent);
+
+if (!empty($_POST)) {
+    identifyTypeVarForlegalizationVarSymbols($_POST);
+}
+if (!empty($_FILES)) {
+    identifyTypeVarForlegalizationVarSymbols($_FILES);
+}
+
+$navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST)) {
     $errors['add-img'][] = 'Возникла непредвиденная ошибка. Возможно, была предпринята попытка загрузки файла
@@ -49,30 +57,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
-    foreach ($_POST as $postKey => $value) {
-        $_POST[$postKey] = makeSymbolsLegal($_POST[$postKey]);  
-    }
-
-    $errors = validateFormFields($rules);
+    validateFormFields($rules, $errors);
     
-    if ($_POST['category'] === 'Выберите категорию') {
+    if (isset($_POST['category']) && $_POST['category'] === 'Выберите категорию') {
         $errors['category'][] = 'Не выбрана категория';
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {   
-    if (isset($_FILES['add-img']['name']) && !empty($_FILES['add-img']['name'])) {
+    if (isset($_FILES['add-img']['name'])) {
         $result = loadFileToServer('add-img');
+        
         if ($result !== NULL) {
             $errors['add-img'][] = $result;
-        }        
+        }   
     }
 
     $lotData = [
         [
-            'name' => htmlspecialchars($_POST['lot-name']),
+            'name' => $_POST['lot-name'],
             'category' => $_POST['category'],
-            'cost' => htmlspecialchars($_POST['lot-rate']),
+            'cost' => $_POST['lot-rate'],
             'url' => '/img/' . $_FILES['add-img']['name'],
             'description' => $_POST['message'],
             'step' => $_POST['lot-step'],
@@ -86,11 +91,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         'descriptionDefaulItem' => 0,
         'navigationMenu' => $navContent,
         'bets' => $bets,
-        'errorFileLoading' => $errorFileLoading,
         'isAuth' => isset($_SESSION['user'])
     ];
 
-    $content = toRenderTemplate('lot.php', $lotVar);
+    $mainContent = renderTemplate('lot.php', $lotVar);
 } else {
     $addVar = [
         'goodsCategory' => $goodsCategory,
@@ -98,26 +102,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         'errors' => $errors
     ];
 
-    $content = toRenderTemplate('add.php',  $addVar);
+    $mainContent = renderTemplate('add.php',  $addVar);
 }
 
-$userVar = [
-    'isAuth' => isset($_SESSION['user']),
-    'userName' => $_SESSION['user'],
-    'userAvatar' => $userAvatar
-];
-
-$userContent = toRenderTemplate('user-menu.php', $userVar);
-
-$layoutVar = [ 
-    'content' => $content,
-    'navigationMenu' => $navContent,
-    'title' => 'Добавление лота',
-    'isMainPage' => false,
-    'userMenu' => $userContent
-];
-
-$layoutContent = toRenderTemplate('layout.php', $layoutVar);
+$layoutContent = renderLayout($mainContent, $navContent, $title, $isMainPage, $userAvatar);
     
 print($layoutContent);
 ?>

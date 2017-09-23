@@ -1,6 +1,8 @@
 <?php 
 date_default_timezone_set('Europe/Moscow');
 
+define(NAME_TEMPLATES_SECONDS, 'templates/'); 
+
 /**
 * Запускает сессию. Выкидывает исключение и,
 * выводит информацию об ошибке, если сессия не стартовала.

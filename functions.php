@@ -1,7 +1,7 @@
 <?php 
 date_default_timezone_set('Europe/Moscow');
 
-define(NAME_TEMPLATES_PATH, 'templates/'); 
+define("NAME_TEMPLATES_PATH", 'templates/'); 
 
 /**
 * Запускает сессию. Выкидывает исключение и,

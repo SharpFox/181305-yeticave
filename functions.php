@@ -1,7 +1,7 @@
 <?php 
 date_default_timezone_set('Europe/Moscow');
 
-define(NAME_TEMPLATES_PATH, 'templates/'); 
+define("NAME_TEMPLATES_PATH", 'templates/'); 
 
 /**
 * Запускает сессию. Выкидывает исключение и,
@@ -28,6 +28,8 @@ startSession();
 function connectDB() {
     return mysqli_connect('localhost', 'root', '', 'yeticave_181305');
 }
+
+$connectMySQL = connectDB();
 
 /**
 * Формирует конечную версию html-страницы.
@@ -98,7 +100,7 @@ function makeSymbolsLegal(& $incomingData) {
     $incomingData = trim(htmlspecialchars($incomingData));
 }
 
-/*
+/**
 * Возвращает время до окончания ставки
 *
 * @return string
@@ -253,7 +255,7 @@ function validateFormFields($rules, &$errors) {
 * Проверяет файл.
 *
 * @param string $attributeValue
-* @return null || string
+* @return mixed
 */
 function validateFile($attributeValue) {
     $result = null;
@@ -380,30 +382,100 @@ function authorizeUser($users, &$errors, $nameKeyEmail, $nameKeyPassword, $nameK
 }
 
 /**
+* Возвращает результат запроса данных из массива.
 *
-*
-*
-*
+* @param array $connect
+* @param string $query
+* @param array $data
+* @return array
 */
-function selectData($connect, $query, $data = [])
-{
+function selectData($connect, $query, $data = []) {
+    $selectedData = [];    
     $stmt = db_get_prepare_stmt($connect, $query, $data);
-
-    $selectedData = [];
     
     if (!$stmt) {
         return $selectedData;
     }
 
     if (!mysqli_stmt_execute($stmt)) {
+        return $selectedData;
+    }
+    
+    $result = mysqli_stmt_get_result($stmt);
+    $arr = mysqli_fetch_array($result, MYSQLI_ASSOC);
+    
+    foreach($arr as $key => $value) {
+        $selectedData[$key] = $row;    
+    }
+
+    mysqli_stmt_close($stmt);  
+
+    return $selectedData; 
+}
+
+/**
+* Добавляет данные в ИБ.
+*
+* @param array $connect
+* @param string $tableName
+* @param array $data
+* @return mixed
+*/
+function insertData($connect, $table, $data = []) {
+    $result = false;
+    $keysArr = [];
+    $valuesArr = [];
+
+    foreach ($data as $key => $value) {
+        $keysArr[] = $key;
+        $valuesArr[] = '?';
+    }
+
+    $query = "INSERT INTO $tableName (implode(', ', $keysArr)) VALUES (implode(', ', $valuesArr))";
+
+    $stmt = db_get_prepare_stmt($connect, $query, $data);
+
+    if (!$stmt) {
         return $result;
     }
+
     mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    
-    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-        $selectedData[] = $row;
-    }
-    mysqli_stmt_close($stmt);   
+
+    $lastInsertedId = mysqli_insert_id($connect);
+
+    if (empty($lastInsertedId)) {
+        mysqli_stmt_close($stmt);
+
+        return $result;
+    }   
+
+    mysqli_stmt_close($stmt);
+
+    return $lastInsertedId;
+}
+
+/**
+* Выполняет произволнй запрос.
+*
+* @param array $connect
+* @param string $query
+* @param array $data
+* @return array
+*/
+function execAnyQuery($connect, $query, $data = []) {    
+    $result = false;
+
+    $stmt = db_get_prepare_stmt($connect, $query, $data);
+
+    if (!$stmt) {
+        return $result;
+    } 
+
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+
+    $result = true;
+
+    return $result;
 }
 ?>

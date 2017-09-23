@@ -402,15 +402,9 @@ function selectData($connect, $query, $data = []) {
     }
     
     $result = mysqli_stmt_get_result($stmt);
-    $arr = mysqli_fetch_array($result, MYSQLI_ASSOC);
-    
-    foreach($arr as $key => $value) {
-        $selectedData[$key] = $row;    
-    }
+    $selectedData = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
-    mysqli_stmt_close($stmt);  
-
-    return $selectedData; 
+    return $selectedData;
 }
 
 /**
@@ -421,7 +415,7 @@ function selectData($connect, $query, $data = []) {
 * @param array $data
 * @return mixed
 */
-function insertData($connect, $table, $data = []) {
+function insertData($connect, $tableName, $data = []) {
     $result = false;
     $keysArr = [];
     $valuesArr = [];
@@ -431,7 +425,7 @@ function insertData($connect, $table, $data = []) {
         $valuesArr[] = '?';
     }
 
-    $query = "INSERT INTO $tableName (implode(', ', $keysArr)) VALUES (implode(', ', $valuesArr))";
+    $query = "INSERT INTO $tableName (" . implode(', ', $keysArr) . " ) VALUES ( " . implode(', ', $valuesArr) . ")";
 
     $stmt = db_get_prepare_stmt($connect, $query, $data);
 
@@ -443,15 +437,7 @@ function insertData($connect, $table, $data = []) {
 
     $lastInsertedId = mysqli_insert_id($connect);
 
-    if (empty($lastInsertedId)) {
-        mysqli_stmt_close($stmt);
-
-        return $result;
-    }   
-
-    mysqli_stmt_close($stmt);
-
-    return $lastInsertedId;
+    return !empty($lastInsertedId) ? $lastInsertedId : $result;
 }
 
 /**
@@ -471,11 +457,6 @@ function execAnyQuery($connect, $query, $data = []) {
         return $result;
     } 
 
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_close($stmt);
-
-    $result = true;
-
-    return $result;
+    return mysqli_stmt_execute($stmt);
 }
 ?>

@@ -376,3 +376,32 @@ function authorizeUser($users, &$errors, $nameKeyEmail, $nameKeyPassword, $nameK
 
     return;
 }
+
+/**
+*
+*
+*
+*
+*/
+function selectData($connect, $query, $data = [])
+{
+    $stmt = db_get_prepare_stmt($connect, $query, $data);
+
+    $selectedData = [];
+    
+    if (!$stmt) {
+        return $selectedData;
+    }
+
+    if (!mysqli_stmt_execute($stmt)) {
+        return $result;
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    
+    while ($row = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $selectedData[] = $row;
+    }
+    mysqli_stmt_close($stmt);   
+}
+?>

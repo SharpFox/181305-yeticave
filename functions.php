@@ -1,6 +1,8 @@
 <?php 
 date_default_timezone_set('Europe/Moscow');
 
+define("NAME_TEMPLATES_PATH", 'templates/'); 
+
 /**
 * Запускает сессию. Выкидывает исключение и,
 * выводит информацию об ошибке, если сессия не стартовала.
@@ -104,7 +106,7 @@ function getlotTimeRemaining() {
 * @return string
 */
 function renderTemplate($path, $varArray) {
-    $path = "templates/" . $path;
+    $path = NAME_TEMPLATES_PATH . $path;
 
     if (!file_exists($path)) {
         return "";

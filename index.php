@@ -11,9 +11,9 @@ $title = 'Главная';
 $queryString = 'SELECT name FROM categories ORDER BY id';
 $categories = selectData($connectMySQL, $queryString);
 
-$queryString = 'SELECT lots.name, lots.cost, lots.url, lots.endTime, categories.name AS category 
+$queryString = 'SELECT lots.id, lots.name, lots.cost, lots.url, lots.endTime, categories.name AS category 
     FROM lots JOIN categories ON lots.categoryId = categories.id
-    WHERE lots.endTime > ' . strval(strtotime('now')) . ' ORDER BY lots.id ASC LIMIT 6';
+    WHERE lots.endTime > "' . date('Y-m-d H:i:s', strtotime('now')) . '" ORDER BY lots.id ASC LIMIT 6';
 
 $lots = selectData($connectMySQL, $queryString);
 

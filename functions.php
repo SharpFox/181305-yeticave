@@ -68,7 +68,9 @@ function identifyTypeVarForlegalizationVarSymbols(& $incomingData) {
     }
 
     if (gettype($incomingData) === 'array') {
-        getRoundArray($incomingData);
+        $result = [];
+        getRoundArray($incomingData, $result, 'makeSymbolsLegal');
+        $incomingData = $result;
     }     
 }
 
@@ -77,13 +79,15 @@ function identifyTypeVarForlegalizationVarSymbols(& $incomingData) {
 * символы, если это необходимо.
 *
 * @param array $arr 
+* @param string $funcName 
+* @return mixed
 */
-function getRoundArray(& $arr) {
+function getRoundArray(& $arr, & $result, $funcName) {
     foreach ($arr as $key => $value) {
         if(is_array($value)) {
-            getRoundArray($value);
+            getRoundArray($value, $result, $funcName);
         } else {
-             makeSymbolsLegal($arr[$key]);
+            $result[$key] = call_user_func($funcName, $arr[$key]);
         }
     }
 }
@@ -94,8 +98,19 @@ function getRoundArray(& $arr) {
 *  
 * @param any $incomingData
 */
-function makeSymbolsLegal(& $incomingData) {
-    $incomingData = trim(htmlspecialchars($incomingData));
+function makeSymbolsLegal($incomingData) {
+    return trim(htmlspecialchars($incomingData));
+}
+
+/**
+* Возвращает факт совпадения имени ключа
+* с предопределенным именем.
+*
+* @param string $value
+* @return boolean
+*/
+function findIdInLot($value) {
+    return $value === 'id' ? true : false;
 }
 
 /**
@@ -136,7 +151,7 @@ function renderTemplate($path, $varArray) {
 * @return string
 */
 function getHumanTimeOfLastRate($time) {
-    $time = time() - $time; 
+    $time = time() - strtotime($time); 
     
     if ($time >= DAY_SECONDS) {
         return date('d.m.y \в H:i', $time);
@@ -157,7 +172,7 @@ function getHumanTimeOfLastRate($time) {
 * @return string
 */
 function getHumanTimeUntilRateEnd($time) {
-    $time = $time - time(); 
+    $time = strtotime($time) - time(); 
     
     if ($time >= DAY_SECONDS) {
         return date('j', $time) . ' дня';
@@ -173,17 +188,12 @@ function getHumanTimeUntilRateEnd($time) {
 /**
 * Выводит на экран информацию об ошибке в случае,
 * если указанный ключ или индекс отсутствуют в массиве.
-*
-* @param mixed $value
-* @param array $currentArray
 */
-function printErrorInfoNotFound($value, $currentArray) {
-    if (!array_key_exists($value, $currentArray)) {
-        header('HTTP/1.1 404 Not Found');
-        print("Ошибка 404. Страница не найдена");    
+function printErrorInfoNotFound() {
+    header('HTTP/1.1 404 Not Found');
+    print("Ошибка 404. Страница не найдена");    
         
-        exit();
-    }
+    exit();
 }
 
 /**

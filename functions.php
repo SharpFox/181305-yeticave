@@ -29,6 +29,8 @@ function connectDB() {
     return mysqli_connect('localhost', 'root', '', 'yeticave_181305');
 }
 
+$connectMySQL = connectDB();
+
 /**
 * Формирует конечную версию html-страницы.
 *
@@ -98,7 +100,7 @@ function makeSymbolsLegal(& $incomingData) {
     $incomingData = trim(htmlspecialchars($incomingData));
 }
 
-/*
+/**
 * Возвращает время до окончания ставки
 *
 * @return string
@@ -253,7 +255,7 @@ function validateFormFields($rules, &$errors) {
 * Проверяет файл.
 *
 * @param string $attributeValue
-* @return null || string
+* @return mixed
 */
 function validateFile($attributeValue) {
     $result = null;
@@ -378,3 +380,83 @@ function authorizeUser($users, &$errors, $nameKeyEmail, $nameKeyPassword, $nameK
 
     return;
 }
+
+/**
+* Возвращает результат запроса данных из массива.
+*
+* @param array $connect
+* @param string $query
+* @param array $data
+* @return array
+*/
+function selectData($connect, $query, $data = []) {
+    $selectedData = [];    
+    $stmt = db_get_prepare_stmt($connect, $query, $data);
+    
+    if (!$stmt) {
+        return $selectedData;
+    }
+
+    if (!mysqli_stmt_execute($stmt)) {
+        return $selectedData;
+    }
+    
+    $result = mysqli_stmt_get_result($stmt);
+    $selectedData = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+    return $selectedData;
+}
+
+/**
+* Добавляет данные в ИБ.
+*
+* @param array $connect
+* @param string $tableName
+* @param array $data
+* @return mixed
+*/
+function insertData($connect, $tableName, $data = []) {
+    $result = false;
+    $keysArr = [];
+    $valuesArr = [];
+
+    foreach ($data as $key => $value) {
+        $keysArr[] = $key;
+        $valuesArr[] = '?';
+    }
+
+    $query = "INSERT INTO $tableName (" . implode(', ', $keysArr) . " ) VALUES ( " . implode(', ', $valuesArr) . ")";
+
+    $stmt = db_get_prepare_stmt($connect, $query, $data);
+
+    if (!$stmt) {
+        return $result;
+    }
+
+    mysqli_stmt_execute($stmt);
+
+    $lastInsertedId = mysqli_insert_id($connect);
+
+    return !empty($lastInsertedId) ? $lastInsertedId : $result;
+}
+
+/**
+* Выполняет произволнй запрос.
+*
+* @param array $connect
+* @param string $query
+* @param array $data
+* @return array
+*/
+function execAnyQuery($connect, $query, $data = []) {    
+    $result = false;
+
+    $stmt = db_get_prepare_stmt($connect, $query, $data);
+
+    if (!$stmt) {
+        return $result;
+    } 
+
+    return mysqli_stmt_execute($stmt);
+}
+?>

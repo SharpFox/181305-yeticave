@@ -14,7 +14,7 @@ if(!$connect) {
     $navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
     $errorContent = renderTemplate('error.php', ['errorMessage' => mysqli_connect_error()]);
     
-    $layoutContent = renderLayout($errorContent, $navContent, $title, $isMainPage, $userAvatar);
+    $layoutContent = renderLayout($errorContent, $navContent, $title, $userAvatar);
     
     print($layoutContent);
 

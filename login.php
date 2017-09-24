@@ -53,7 +53,7 @@ $loginVar = [
 ];    
 
 $loginContent = renderTemplate('login.php', $loginVar);
-$layoutContent = renderLayout($loginContent, $navContent, $title, $isMainPage, $userAvatar);
+$layoutContent = renderLayout($loginContent, $navContent, $title, $userAvatar);
     
 print($layoutContent);
 ?>

@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
     $mainContent = renderTemplate('add.php',  $addVar);
 }
 
-$layoutContent = renderLayout($mainContent, $navContent, $title, $isMainPage, $userAvatar);
+$layoutContent = renderLayout($mainContent, $navContent, $title, $userAvatar);
     
 print($layoutContent);
 ?>

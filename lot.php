@@ -67,7 +67,7 @@ $lotVar = [
 
 $lotContent = renderTemplate('lot.php', $lotVar);
 
-$layoutContent = renderLayout($lotContent, $navContent, $title, $isMainPage, $userAvatar);
+$layoutContent = renderLayout($lotContent, $navContent, $title, $userAvatar);
     
 print($layoutContent);
 ?>

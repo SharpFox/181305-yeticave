@@ -35,19 +35,17 @@ $connectMySQL = connectDB();
 * Формирует конечную версию html-страницы.
 *
 * @param string $mainContent
+* @param string $navContent
 * @param string $title
-* @param boolean $isMainPage
-* @param array $goodsCategory
 * @param string $userAvatar
 * @return string
 */
-function renderLayout($mainContent, $navContent, $title, $isMainPage, $userAvatar) {
+function renderLayout($mainContent, $navContent, $title, $userAvatar) {
     
     $layoutVar = [ 
         'content' => $mainContent,
         'navigationMenu' => $navContent,
         'title' => $title,
-        'isMainPage' => $isMainPage,
         'userMenu' => renderTemplate('user-menu.php', getUserMenuVar($userAvatar))
     ];
     
@@ -402,9 +400,7 @@ function selectData($connect, $query, $data = []) {
     }
     
     $result = mysqli_stmt_get_result($stmt);
-    $selectedData = mysqli_fetch_all($result, MYSQLI_ASSOC);
-
-    return $selectedData;
+    return mysqli_fetch_all($result, MYSQLI_ASSOC);
 }
 
 /**

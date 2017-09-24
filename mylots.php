@@ -28,7 +28,7 @@ $mylotsVar = [
 
 $mylotsContent = renderTemplate('mylots.php', $mylotsVar);
 
-$layoutContent = renderLayout($mylotsContent, $navContent, $title, $isMainPage, $userAvatar);
+$layoutContent = renderLayout($mylotsContent, $navContent, $title, $userAvatar);
 
 print($layoutContent);
 ?>

@@ -9,7 +9,7 @@ define("IP_MYSQL", 'localhost');
 define("IP_MYSQL_USERNAME", 'root');
 define("IP_MYSQL_PASSWORD", '');
 define("IP_MYSQL_DATABASENAME", 'yeticave_181305');
-define("IP_MYSQL_PORT", '');
+define("IP_MYSQL_PORT", NULL);
 
 $connectMySQL = mysqli_connect(IP_MYSQL, IP_MYSQL_USERNAME, IP_MYSQL_PASSWORD, IP_MYSQL_DATABASENAME, IP_MYSQL_PORT);
 

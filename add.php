@@ -85,7 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         'url' => '/img/' . $_FILES['add-img']['name'],
         'description' => $_POST['message'],
         'step' => $_POST['lot-step'],
-        'endTime' => $_POST['lot-date'] . ' 23:59:59'
+        'endTime' => date("Y-m-d H:i:s", strtotime($_POST['lot-date'] . ' 23:59:59')),
+        'quantityBets' => 0,
+        'authorId' => isset($_SESSION['user']) ? $_SESSION['userId'] : NULL, 
+        'winnerId' => NULL,
+        'createdTime' => date("Y-m-d H:i:s", time())
     ];  
 
     $lotId = insertData($connectMySQL, 'lots', $lotData);

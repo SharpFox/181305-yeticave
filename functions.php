@@ -21,17 +21,6 @@ function startSession() {
 startSession();
 
 /**
-* Возвращает результат соединения с ИБ.
-*
-* @return boolean
-*/
-function connectDB() {
-    return mysqli_connect('localhost', 'root', '', 'yeticave_181305');
-}
-
-$connectMySQL = connectDB();
-
-/**
 * Формирует конечную версию html-страницы.
 *
 * @param string $mainContent
@@ -40,13 +29,13 @@ $connectMySQL = connectDB();
 * @param string $userAvatar
 * @return string
 */
-function renderLayout($mainContent, $navContent, $title, $userAvatar) {
+function renderLayout($mainContent, $navContent, $title) {
     
     $layoutVar = [ 
         'content' => $mainContent,
         'navigationMenu' => $navContent,
         'title' => $title,
-        'userMenu' => renderTemplate('user-menu.php', getUserMenuVar($userAvatar))
+        'userMenu' => renderTemplate('user-menu.php', getUserMenuVar())
     ];
     
     return renderTemplate('layout.php', $layoutVar);
@@ -68,9 +57,9 @@ function identifyTypeVarForlegalizationVarSymbols(& $incomingData) {
     }
 
     if (gettype($incomingData) === 'array') {
-        $result = [];
+        /*$result = [];
         getRoundArray($incomingData, $result, 'makeSymbolsLegal');
-        $incomingData = $result;
+        $incomingData = $result;*/
     }     
 }
 
@@ -102,15 +91,31 @@ function makeSymbolsLegal($incomingData) {
     return trim(htmlspecialchars($incomingData));
 }
 
+
 /**
 * Возвращает факт совпадения имени ключа
 * с предопределенным именем.
 *
-* @param string $value
-* @return boolean
+* @param array $arr 
+* @param boolean $result 
 */
-function findIdInLot($value) {
-    return $value === 'id' ? true : false;
+function findIdInLot(& $arr, & $result) {
+    if ($result) {
+        return;
+    }
+
+    foreach ($arr as $key => $value) {
+        if(is_array($value)) {
+            findIdInLot($value, $result);
+            return;
+        } 
+
+        if ($result) {
+            return;
+        }
+
+        $result = $key === 'id' ? true : false;        
+    }
 }
 
 /**
@@ -154,11 +159,11 @@ function getHumanTimeOfLastRate($time) {
     $time = time() - strtotime($time); 
     
     if ($time >= DAY_SECONDS) {
-        return date('d.m.y \в H:i', $time);
+        return date('j', $time) . ' дней назад';
     }
     
     if ($time < DAY_SECONDS && $time >= HOUR_SECONDS) {
-        return  date('h', $time) . ' часов назад';
+        return  date('G', $time) . ' часов назад';
     }
     
     return date('i', $time) . ' минут назад';
@@ -196,18 +201,18 @@ function printErrorInfoNotFound() {
     exit();
 }
 
-/**
-* Если сессия не активна, то выдаётся
-* ошибка 403 "Доступ запрещен"
+/*
+* Проверяет существование сессии.
 *
-* @param boolean $userAuth
 */
-function printErrorInfoForbidden($userAuth) {   
-    if (!$userAuth) {
-        header("Location: login.php"); 
-        
-        exit();
+function checkSessionAccess() {
+    if (isset($_SESSION['user'])) {
+        return;    
     }
+
+    header("Location: login.php");
+
+    exit();
 }
 
 /**
@@ -313,36 +318,27 @@ function loadFileToServer($attributeValue) {
 * по e-mail адресу.
 *
 * @param string $email
-* @param string $users
-* @return NULL || string
+* @param array $connectMySQL
+* @return array
 */
-function searchUserByEmail($email, $users) {
-    $result = null;
-
-    foreach ($users as $user) {
-        if ($user['email'] == $email) {
-            $result = $user;
-            break;
-        }
-    }
-
-    return $result;
+function searchUserByEmail($email, $connectMySQL) {
+    $queryString = 'SELECT id, email, name, url, passwordHash FROM users WHERE email = "' . $email . '"';
+    return selectData($connectMySQL, $queryString);
 }
 
 /**
 * Возвращает массив с данными пользователя,
 * таковой авторизован.
 *
-* @param string $userAvatar
 * @return array
 */
-function getUserMenuVar($userAvatar) {
+function getUserMenuVar() {
     $sessionOpen = isset($_SESSION['user']);
     
     $userVar = [
         'isAuth' => $sessionOpen,
         'userName' => $sessionOpen ? $_SESSION['user'] : '',
-        'userAvatar' => $sessionOpen ? $userAvatar : ''
+        'userAvatar' => $sessionOpen ? $_SESSION['avatarUrl'] : ''
     ];
 
     return $userVar;
@@ -351,39 +347,37 @@ function getUserMenuVar($userAvatar) {
 /**
 * Выполняет авторизацию пользователя.
 * 
-* @param array $user
 * @link array $errors
-* @param string $nameKeyEmail
-* @param string $nameKeyPassword
-* @param string $nameKeyUserName
+* @param array $connectMySQL
 */
-function authorizeUser($users, &$errors, $nameKeyEmail, $nameKeyPassword, $nameKeyUserName) {
-    
-    if (!key_exists($nameKeyEmail, $_POST)) {
-        $errors[$nameKeyEmail][] = 'Не найдено свойство ' . $nameKeyEmail . '. Обратитесь в тех. поддержку';
+function authorizeUser(&$errors, $connectMySQL) {
+
+    $findUser = searchUserByEmail($_POST['email'], $connectMySQL);
+
+    $user = [];
+    foreach($findUser as $key => $arr) {
+        foreach($arr as $key => $value) {
+            $user[$key] = $value;
+        }
     }
 
-    if (!key_exists($nameKeyPassword, $_POST)) {
-        $errors[$nameKeyPassword][] = 'Не найдено свойство ' . $nameKeyPassword . '. Обратитесь в тех. поддержку';
-        
-        return;    
-    }
-
-    $user = searchUserByEmail($_POST[$nameKeyEmail], $users);
-
-    if ($user === NULL) {
-        $errors[$nameKeyEmail][] = 'Пользователь с введённым e-mail адресом не зарегистрирован';
+    if (empty($user)) {
+        $errors['email'][] = 'Пользователь с введённым e-mail адресом не зарегистрирован';
 
         return;
     }
 
-    if (!password_verify($_POST[$nameKeyPassword], $user[$nameKeyPassword])) {
+    if (!password_verify($_POST['password'], $user['passwordHash'])) {
         $errors['password'][] = 'Вы ввели неверный пароль';
 
         return;
     } 
 
-    $_SESSION['user'] = $user[$nameKeyUserName];
+    $_SESSION['user'] = $user['name'];
+    $_SESSION['email'] = $user['email'];
+    $_SESSION['userId'] = $user['id'];
+    $_SESSION['avatarUrl'] = $user['url'];
+
     header("Location: index.php");
 
     return;
@@ -431,7 +425,7 @@ function insertData($connect, $tableName, $data = []) {
         $valuesArr[] = '?';
     }
 
-    $query = "INSERT INTO $tableName (" . implode(', ', $keysArr) . " ) VALUES ( " . implode(', ', $valuesArr) . ")";
+    $query = "INSERT INTO $tableName (" . implode(', ', $keysArr) . ") VALUES (" . implode(', ', $valuesArr) . ")";
 
     $stmt = db_get_prepare_stmt($connect, $query, $data);
 

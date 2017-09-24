@@ -11,64 +11,52 @@ $categories = selectData($connectMySQL, $queryString);
 
 identifyTypeVarForlegalizationVarSymbols($categories);
 
-$lotItem = isset($_GET['id']) ? $_GET['id'] : null;
+$lotId = isset($_GET['id']) ? $_GET['id'] : null;
 
-$queryString = 'SELECT lots.id, lots.name, lots.cost, lots.url, lots.description, lots.endTime, lots.step, categories.name AS category 
+$queryString = 'SELECT lots.id, lots.name, lots.cost, lots.url, lots.description, lots.endTime, lots.step, lots.quantityBets, categories.name AS category 
     FROM lots LEFT JOIN categories ON lots.categoryId = categories.id
-    WHERE lots.id = ' . $lotItem;
+    WHERE lots.id = ' . $lotId;
 
-$lot = selectData($connectMySQL, $queryString);
+$findLot = selectData($connectMySQL, $queryString);
 
-identifyTypeVarForlegalizationVarSymbols($lot);
+identifyTypeVarForlegalizationVarSymbols($findLot);
 
-if (!getRoundArray($lot, 'findIdInLot')) {
+$isLotFind = false;
+!findIdInLot($findLot, $isLotFind);
+if (!$isLotFind) {
     printErrorInfoNotFound();
 }
 
-$queryString = 'SELECT bets.cost, bets.createdTime, users.name AS user   
+$lot = [];
+foreach($findLot as $key => $arr) {
+    foreach($arr as $key => $value) {
+        $lot[$key] = $value;
+    }
+}
+
+$title = $lot['name'];
+
+$queryString = 'SELECT bets.cost, bets.createdTime, bets.userId, users.name AS user   
     FROM bets JOIN users ON bets.userId = users.id JOIN lots ON bets.lotId = lots.id
-    WHERE bets.lotId = ' . $lotItem;
+    WHERE bets.lotId = ' . $lotId;
 
 $bets = selectData($connectMySQL, $queryString);
 
 identifyTypeVarForlegalizationVarSymbols($bets);
 
-$user_bets = [];
 $isBetMade = false;
 
-if (isset($_COOKIE['bets'])) {
-    $user_bets = json_decode($_COOKIE['bets'], true);
+foreach($bets as $key=> $bet) {
+    if ($bet['userId'] === (isset($_SESSION['userId']) ? $_SESSION['userId'] : NULL)) { 
+        $isBetMade = true;
+        break;
+    }
+}    
 
-    foreach($user_bets as $key=> $value) {
-        if ($user_bets[$key]['lotItem'] === $lotItem) { 
-            $isBetMade = true;
-        }
-    }    
-}
-
-$title = $lot[$lotItem]['name'];
-$isMainPage = false;
-$descriptionDefaulItem = 0;
-
-$navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
+$navContent = renderTemplate('nav.php', ['categories' => $categories]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $currentLot = [
-        'lotItem' => $lotItem,
-        'name' => $lot['name'],
-        'category' => $lot['category'],
-        'cost' => $_POST['cost'],
-        'url' => $lot['url'],
-        'timeBetting' => time(),
-        'lotTimeRemaining' => $lot['lotTimeRemaining']
-    ];
-
-    array_push($user_bets, $currentLot);
-
-    $user_bets_encoded = json_encode($user_bets);
     header('location: mylots.php');
-    setcookie('bets', $user_bets_encoded, time() + DAY_SECONDS);
-
     exit();
 }
 
@@ -82,7 +70,7 @@ $lotVar = [
 
 $lotContent = renderTemplate('lot.php', $lotVar);
 
-$layoutContent = renderLayout($lotContent, $navContent, $title, $userAvatar);
+$layoutContent = renderLayout($lotContent, $navContent, $title);
     
 print($layoutContent);
 ?>

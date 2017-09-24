@@ -3,10 +3,9 @@ require_once('functions.php');
 require_once('init.php');
 require_once('data.php');
 
-printErrorInfoForbidden(isset($_SESSION['user']));
+checkSessionAccess();
 
 $title = 'Добавление лота';
-$isMainPage = false;
 $ValueOfAttributeName = 'add-img';
 
 $errors = [];
@@ -40,8 +39,10 @@ $rules = [
     ]
 ];
 
-identifyTypeVarForlegalizationVarSymbols($goodsCategory);
-identifyTypeVarForlegalizationVarSymbols($goodsContent);
+$queryString = 'SELECT name FROM categories ORDER BY id';
+$categories = selectData($connectMySQL, $queryString);
+
+identifyTypeVarForlegalizationVarSymbols($categories);
 
 if (!empty($_POST)) {
     identifyTypeVarForlegalizationVarSymbols($_POST);
@@ -50,7 +51,7 @@ if (!empty($_FILES)) {
     identifyTypeVarForlegalizationVarSymbols($_FILES);
 }
 
-$navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
+$navContent = renderTemplate('nav.php', ['categories' => $categories]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST)) {
     $errors['add-img'][] = 'Возникла непредвиденная ошибка. Возможно, была предпринята попытка загрузки файла
@@ -74,31 +75,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         }   
     }
 
+    $queryString = 'SELECT id FROM categories WHERE name = "' . $_POST['category'] . '"';
+    $findCategory = selectData($connectMySQL, $queryString);
+
     $lotData = [
-        [
-            'name' => $_POST['lot-name'],
-            'category' => $_POST['category'],
-            'cost' => $_POST['lot-rate'],
-            'url' => '/img/' . $_FILES['add-img']['name'],
-            'description' => $_POST['message'],
-            'step' => $_POST['lot-step'],
-            'lotTimeRemaining' => getHumanTimeUntilRateEnd(strtotime($_POST['lot-date'] . ' 23:59:59'))
-        ]
+        'name' => $_POST['lot-name'],
+        'categoryId' => $findCategory[0]['id'],
+        'cost' => $_POST['lot-rate'],
+        'url' => '/img/' . $_FILES['add-img']['name'],
+        'description' => $_POST['message'],
+        'step' => $_POST['lot-step'],
+        'endTime' => $_POST['lot-date'] . ' 23:59:59'
     ];  
+
+    $lotId = insertData($connectMySQL, 'lots', $lotData);
+    
+    $queryString = 'SELECT lots.id, lots.name, lots.cost, lots.url, lots.description, lots.endTime, lots.step, lots.quantityBets, categories.name AS category 
+    FROM lots LEFT JOIN categories ON lots.categoryId = categories.id
+    WHERE lots.id = ' . $lotId;
+        
+    $findLot = selectData($connectMySQL, $queryString);
+    
+    identifyTypeVarForlegalizationVarSymbols($findLot);
+
+    $lot = [];
+    foreach($findLot as $key => $arr) {
+        foreach($arr as $key => $value) {
+            $lot[$key] = $value;
+        }
+    }
     
     $lotVar = [
-        'goodsContent' => $lotData,
-        'goodsItem' => 0,
-        'descriptionDefaulItem' => 0,
+        'lot' => $lot,
         'navigationMenu' => $navContent,
-        'bets' => $bets,
+        'bets' => array(),
+        'isBetMade' => false,
         'isAuth' => isset($_SESSION['user'])
     ];
 
     $mainContent = renderTemplate('lot.php', $lotVar);
 } else {
     $addVar = [
-        'goodsCategory' => $goodsCategory,
+        'categories' => $categories,
         'navigationMenu' => $navContent,
         'errors' => $errors
     ];
@@ -106,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
     $mainContent = renderTemplate('add.php',  $addVar);
 }
 
-$layoutContent = renderLayout($mainContent, $navContent, $title, $userAvatar);
+$layoutContent = renderLayout($mainContent, $navContent, $title);
     
 print($layoutContent);
 ?>

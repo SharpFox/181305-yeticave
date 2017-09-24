@@ -15,8 +15,8 @@
         <label for="category">Категория</label>
         <select id="category" name="category" required>
           <option>Выберите категорию</option>
-          <?php foreach($goodsCategory as $value): ?>
-            <option value="<?=$value; ?>" <?=key_exists('category', $_POST) && $_POST['category'] == $value ? 'selected' : '' ?>><?=$value;?></option>   
+          <?php foreach($categories as $category): ?>
+            <option value="<?=$category['name']; ?>" <?=key_exists('category', $_POST) && $_POST['category'] == $category['name'] ? 'selected' : '' ?>><?=$category['name'];?></option>   
           <?php endforeach; ?>
         </select>
         <span class="form__error"><?=key_exists('category', $errors) ? implode(', ', $errors['category']) : '' ?></span>

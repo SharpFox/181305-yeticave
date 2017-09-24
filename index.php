@@ -29,7 +29,7 @@ $indexVar = [
 ];
 
 $indexContent = renderTemplate('index.php', $indexVar);
-$layoutContent = renderLayout($indexContent, $navContent, $title, $userAvatar);
+$layoutContent = renderLayout($indexContent, $navContent, $title);
 
 print($layoutContent);
 ?>

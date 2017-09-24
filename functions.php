@@ -21,6 +21,15 @@ function startSession() {
 startSession();
 
 /**
+* Возвращает результат соединения с ИБ.
+*
+* @return boolean
+*/
+function connectDB() {
+    return mysqli_connect('localhost', 'root', '', 'yeticave_181305');
+}
+
+/**
 * Формирует конечную версию html-страницы.
 *
 * @param string $mainContent
@@ -369,4 +378,3 @@ function authorizeUser($users, &$errors, $nameKeyEmail, $nameKeyPassword, $nameK
 
     return;
 }
-?>

@@ -21,17 +21,6 @@ function startSession() {
 startSession();
 
 /**
-* Возвращает результат соединения с ИБ.
-*
-* @return boolean
-*/
-function connectDB() {
-    return mysqli_connect('localhost', 'root', '', 'yeticave_181305');
-}
-
-$connectMySQL = connectDB();
-
-/**
 * Формирует конечную версию html-страницы.
 *
 * @param string $mainContent

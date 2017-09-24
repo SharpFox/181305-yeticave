@@ -1,20 +1,17 @@
 <?php
-header('Content-Type: text/html; charset=utf-8');
-
 require_once('functions.php');
 require_once('mysql_helper.php');
 require_once('data.php');
 
-$connect = connectDB();
+$connectMySQL = mysqli_connect('localhost', 'root', '', 'yeticave_181305');
 
-if(!$connect) {
+if(!$connectMySQL) {
     $title = 'Вход';
-    $isMainPage = false;
     
-    $navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
+    $navContent = '';
     $errorContent = renderTemplate('error.php', ['errorMessage' => mysqli_connect_error()]);
     
-    $layoutContent = renderLayout($errorContent, $navContent, $title, $isMainPage, $userAvatar);
+    $layoutContent = renderLayout($errorContent, $navContent, $title);
     
     print($layoutContent);
 

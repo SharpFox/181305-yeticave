@@ -6,23 +6,23 @@ CREATE TABLE users (
 	email 			  VARCHAR (254) NOT NULL,
 	passwordHash 	VARCHAR(60) 	NOT NULL,
 	name 				  VARCHAR(40) 	NOT NULL,
-  avatarUrl 		VARCHAR(150),
+  url 		      VARCHAR(150),
 	contacts 		  VARCHAR(200) 	NOT NULL,
 	createdTime 	DATETIME,
   PRIMARY KEY(id)
-) ENGINE=InnoDB CHARACTER SET=UTF8;
+) ENGINE = InnoDB CHARACTER SET = UTF8;
 
 CREATE TABLE categories (
   id 		INT UNSIGNED 	AUTO_INCREMENT,
   name 	VARCHAR(40) 	NOT NULL,
   PRIMARY KEY(id)
-) ENGINE=InnoDB CHARACTER SET=UTF8;
+) ENGINE = InnoDB CHARACTER SET = UTF8;
 
 CREATE TABLE lots (
   id 					    INT UNSIGNED 	AUTO_INCREMENT,
   name 				    VARCHAR(150) 	NOT NULL,
   cost 				    DOUBLE 			  NOT NULL,
-  imgUrl 			    VARCHAR(150) 	NOT NULL,
+  url 			      VARCHAR(150) 	NOT NULL,
   description 		TEXT(600) 		NOT NULL,
   endTime 	      DATETIME 		  NOT NULL,
   step 				    INT UNSIGNED 	NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE lots (
   FOREIGN KEY (winnerId) REFERENCES users(id)
     ON UPDATE CASCADE
     ON DELETE RESTRICT
-) ENGINE=InnoDB CHARACTER SET=UTF8;
+) ENGINE = InnoDB CHARACTER SET = UTF8;
 
 CREATE TABLE bets (
   id 				    INT UNSIGNED  AUTO_INCREMENT,
@@ -57,7 +57,7 @@ CREATE TABLE bets (
   FOREIGN KEY (lotId) REFERENCES lots(id)
     ON UPDATE CASCADE
     ON DELETE RESTRICT
-) ENGINE=InnoDB CHARACTER SET=UTF8;
+) ENGINE = InnoDB CHARACTER SET = UTF8;
 
 CREATE UNIQUE INDEX email ON users(email);
 CREATE UNIQUE INDEX name ON categories(name);

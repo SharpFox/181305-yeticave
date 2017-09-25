@@ -114,7 +114,7 @@ function findIdInLot(& $arr, & $result) {
             return;
         }
 
-        $result = $key === 'id' ? true : false;        
+        $result = $key === 'lotId' ? true : false;        
     }
 }
 

@@ -87,14 +87,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         'step' => intval($_POST['lot-step']),       
         'quantityBets' => 0,
         'categoryId' => $findCategory[0]['id'],
-        'authorId' => isset($_SESSION['user']) ? $_SESSION['userId'] : NULL, 
-        'winnerId' => 0,
+        'authorId' => isset($_SESSION['user']) ? $_SESSION['userId'] : NULL,
         'createdTime' => date("Y-m-d H:i:s", time())
     ];  
 
     $lotId = insertData($connectMySQL, 'lots', $lotData);
 
-    $queryString = 'SELECT lots.id AS lotId, lots.name AS LotName, lots.cost, lots.url, lots.description, lots.endTime, lots.step, lots.quantityBets, categories.name AS category 
+    $queryString = 'SELECT lots.id AS lotId, lots.name AS lotName, lots.cost, lots.url, lots.description, lots.endTime, lots.step, lots.quantityBets, categories.name AS category 
     FROM lots LEFT JOIN categories ON lots.categoryId = categories.id
     WHERE lots.id = ' . $lotId;
         
@@ -116,6 +115,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         'isBetMade' => false,
         'isAuth' => isset($_SESSION['user'])
     ];
+
+    header('location: lot.php?id=' . $lotId . '');
 
     $mainContent = renderTemplate('lot.php', $lotVar);
 } else {

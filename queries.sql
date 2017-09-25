@@ -32,17 +32,27 @@ INSERT INTO bets (createdTime, endTime, cost, userId, lotId) VALUES
     ('2017-09-06 16:42:01', '2017-10-15 15:00:00', 164999, 1, 2);
 
 /* Список категорий */
-SELECT * FROM categories ORDER BY id;
+SELECT name
+FROM categories
+ORDER BY id;
 
 /* Самые новые открытые лоты */
-SELECT lots.name, lots.cost, lots.imgUrl, lots.step, lots.quantityBets, categories.name  FROM lots , categories 
-WHERE lots.endTime > (SELECT now()) AND lots.categoryId = categories.id;
+SELECT lots.name AS lotName, lots.cost, lots.imgUrl, lots.step, lots.quantityBets, categories.name AS categoryName 
+FROM lots INNER JOIN categories 
+WHERE lots.endTime > NOW() AND lots.categoryId = categories.id;
 
 /* Лот по названию и описанию*/
-SELECT * FROM lots WHERE lots.name LIKE 'DC Ply Mens 2016/2017 Snowboard' or lots.description LIKE 'Эта доска - ваш билет в спорт';
+SELECT lots.id AS lotId, lots.name, lots.cost,  lots.imgUrl, lots.description, lots.endTime, lots.step,
+    lots.quantityBets, lots.categoryId, lots.authorId, lots.winnerId, lots.createdTime
+FROM lots 
+WHERE lots.name LIKE 'DC Ply Mens 2016/2017 Snowboard' or lots.description LIKE 'Эта доска - ваш билет в спорт';
 
 /* Обновляет название лота по его идентификатору */
-UPDATE lots SET lots.name = 'Маска Oakley Canopy Canada' WHERE lots.id = 6;
+UPDATE lots 
+SET lots.name = 'Маска Oakley Canopy Canada' 
+WHERE lots.id = 6;
 
 /* Получает список самых свежих ставок для лота по его идентификатору */
-SELECT lots.name, bets.createdTime, bets.cost FROM bets, lots WHERE bets.createdTime > '2017-09-01 00:00:00' AND bets.lotId = lots.id ORDER BY bets.createdTime DESC;
+SELECT lots.name, bets.cost, bets.createdTime, bets.endTime   
+FROM bets INNER JOIN lots 
+WHERE bets.endTime > (NOW() - INTERVAL 1 DAY) AND bets.lotId = lots.id ORDER BY bets.createdTime DESC;

@@ -14,7 +14,7 @@ identifyTypeVarForlegalizationVarSymbols($categories);
 $lotId = isset($_GET['id']) ? $_GET['id'] : null;
 
 $queryString = 'SELECT lots.id, lots.name, lots.cost, lots.url, lots.description, lots.endTime, lots.step, lots.quantityBets, categories.name AS category 
-    FROM lots LEFT JOIN categories ON lots.categoryId = categories.id
+    FROM lots INNER JOIN categories ON lots.categoryId = categories.id
     WHERE lots.id = ' . $lotId;
 
 $findLot = selectData($connectMySQL, $queryString);
@@ -37,7 +37,7 @@ foreach($findLot as $key => $arr) {
 $title = $lot['name'];
 
 $queryString = 'SELECT bets.cost, bets.createdTime, bets.userId, users.name AS user   
-    FROM bets JOIN users ON bets.userId = users.id JOIN lots ON bets.lotId = lots.id
+    FROM bets INNER JOIN users ON bets.userId = users.id INNER JOIN lots ON bets.lotId = lots.id
     WHERE bets.lotId = ' . $lotId;
 
 $bets = selectData($connectMySQL, $queryString);

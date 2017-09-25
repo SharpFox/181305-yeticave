@@ -19,9 +19,9 @@ identifyTypeVarForlegalizationVarSymbols($categories);
 
 $queryString = 'SELECT bets.createdTime, bets.endTime, bets.cost, bets.lotId, categories.name AS category, lots.name AS lotName, lots.url AS lotsUrl
     FROM bets 
-    JOIN lots ON bets.lotId = lots.id 
-    JOIN categories ON lots.categoryId = categories.id 
-    JOIN users ON bets.userId = users.id
+    INNER JOIN lots ON bets.lotId = lots.id 
+    INNER JOIN categories ON lots.categoryId = categories.id 
+    INNER JOIN users ON bets.userId = users.id
     WHERE users.email = "' . $_SESSION['email'] .'"';
 
 $bets = selectData($connectMySQL, $queryString);

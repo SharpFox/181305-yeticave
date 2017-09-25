@@ -417,15 +417,15 @@ function selectData($connect, $query, $data = []) {
 */
 function insertData($connect, $tableName, $data = []) {
     $result = false;
-    $keysArr = [];
-    $valuesArr = [];
+    $placeholderArr = [];
+
+    $keysArr = array_keys($data);
 
     foreach ($data as $key => $value) {
-        $keysArr[] = $key;
-        $valuesArr[] = '?';
+        $placeholderArr[] = '?';
     }
 
-    $query = "INSERT INTO $tableName (" . implode(', ', $keysArr) . ") VALUES (" . implode(', ', $valuesArr) . ")";
+    $query = "INSERT INTO " . $tableName . " (" . implode(', ', $keysArr) . ") VALUES (" . implode(', ', $placeholderArr) . ")";
 
     $stmt = db_get_prepare_stmt($connect, $query, $data);
 

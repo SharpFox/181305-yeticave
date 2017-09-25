@@ -80,21 +80,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
 
     $lotData = [
         'name' => $_POST['lot-name'],
-        'categoryId' => $findCategory[0]['id'],
-        'cost' => $_POST['lot-rate'],
+        'cost' => intval($_POST['lot-rate']),
         'url' => '/img/' . $_FILES['add-img']['name'],
         'description' => $_POST['message'],
-        'step' => $_POST['lot-step'],
         'endTime' => date("Y-m-d H:i:s", strtotime($_POST['lot-date'] . ' 23:59:59')),
+        'step' => intval($_POST['lot-step']),       
         'quantityBets' => 0,
+        'categoryId' => $findCategory[0]['id'],
         'authorId' => isset($_SESSION['user']) ? $_SESSION['userId'] : NULL, 
-        'winnerId' => NULL,
+        'winnerId' => 0,
         'createdTime' => date("Y-m-d H:i:s", time())
     ];  
 
     $lotId = insertData($connectMySQL, 'lots', $lotData);
-    
-    $queryString = 'SELECT lots.id, lots.name, lots.cost, lots.url, lots.description, lots.endTime, lots.step, lots.quantityBets, categories.name AS category 
+
+    $queryString = 'SELECT lots.id AS lotId, lots.name AS LotName, lots.cost, lots.url, lots.description, lots.endTime, lots.step, lots.quantityBets, categories.name AS category 
     FROM lots LEFT JOIN categories ON lots.categoryId = categories.id
     WHERE lots.id = ' . $lotId;
         

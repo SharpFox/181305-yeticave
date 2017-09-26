@@ -57,9 +57,7 @@ function identifyTypeVarForlegalizationVarSymbols(& $incomingData) {
     }
 
     if (gettype($incomingData) === 'array') {
-        /*$result = [];
-        getRoundArray($incomingData, $result, 'makeSymbolsLegal');
-        $incomingData = $result;*/
+        $incomingData = makeSymbolsLegalInArray($incomingData, 'makeSymbolsLegal');
     }     
 }
 
@@ -71,14 +69,21 @@ function identifyTypeVarForlegalizationVarSymbols(& $incomingData) {
 * @param string $funcName 
 * @return mixed
 */
-function getRoundArray(& $arr, & $result, $funcName) {
+function makeSymbolsLegalInArray($arr, $funcName) {
+    $result = [];
+
     foreach ($arr as $key => $value) {
         if(is_array($value)) {
-            getRoundArray($value, $result, $funcName);
+            $ret = makeSymbolsLegalInArray($value, $funcName);
+            if(count($ret)) $result[] = $ret;
+
+            
         } else {
             $result[$key] = call_user_func($funcName, $arr[$key]);
         }
     }
+
+    return $result;
 }
 
 /**

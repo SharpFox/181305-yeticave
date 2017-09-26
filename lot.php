@@ -6,14 +6,20 @@ require_once('mysql_helper.php');
 require_once('init.php');
 require_once('data.php');
 
-$queryString = 'SELECT name FROM categories ORDER BY id';
-$categories = selectData($connectMySQL, $queryString);
+$errors = [];
 
-identifyTypeVarForlegalizationVarSymbols($categories);
+$rules = [
+    'cost' => [
+        'required',
+        'numeric',
+        'notNegative'
+    ]
+];
 
 $lotId = isset($_GET['id']) ? $_GET['id'] : null;
 
-$queryString = 'SELECT lots.id AS lotId, lots.name AS lotName, lots.cost AS lastCost, lots.cost + lots.step AS currentCost, lots.url, lots.description, lots.endTime, lots.createdTime, lots.step, lots.quantityBets, categories.name AS category 
+$queryString = 'SELECT lots.id AS lotId, lots.name AS lotName, lots.cost AS lastCost, lots.cost + lots.step AS currentCost,
+        lots.url, lots.description, lots.endTime, lots.createdTime, lots.step, lots.quantityBets, categories.name AS category 
     FROM lots INNER JOIN categories ON lots.categoryId = categories.id
     WHERE lots.id = ' . $lotId;
 
@@ -35,7 +41,15 @@ foreach($findLot as $key => $arr) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
+    validateFormFields($rules, $errors);
+
+    if (intval($_POST['cost']) <= $lot['lastCost']) { 
+        $errors['cost'][] = 'Новая ставка не может быть меньше или равна текущей цене лота';     
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
+
     mysqli_query($connectMySQL, "START TRANSACTION");
     
     $lotData = [
@@ -81,6 +95,11 @@ foreach($bets as $key=> $bet) {
     }
 }    
 
+$queryString = 'SELECT name FROM categories ORDER BY id';
+$categories = selectData($connectMySQL, $queryString);
+
+identifyTypeVarForlegalizationVarSymbols($categories);
+
 $navContent = renderTemplate('nav.php', ['categories' => $categories]);
 
 $lotVar = [ 
@@ -88,7 +107,8 @@ $lotVar = [
     'navigationMenu' => $navContent,
     'bets' => $bets,
     'isBetMade' => $isBetMade,
-    'isAuth' => isset($_SESSION['user'])
+    'isAuth' => isset($_SESSION['userId']) ? true : false,
+    'errors' => $errors
 ];
 
 $lotContent = renderTemplate('lot.php', $lotVar);

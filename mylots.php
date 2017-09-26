@@ -12,11 +12,6 @@ if (!isset($_SESSION['user'])) {
 
 $title = 'Мои ставки';
 
-$queryString = 'SELECT name FROM categories ORDER BY id';
-$categories = selectData($connectMySQL, $queryString);
-
-identifyTypeVarForlegalizationVarSymbols($categories);
-
 $queryString = 'SELECT bets.createdTime, bets.endTime, bets.cost, bets.lotId, categories.name AS category, lots.name AS lotName, lots.url AS lotsUrl
     FROM bets 
     INNER JOIN lots ON bets.lotId = lots.id 
@@ -27,6 +22,11 @@ $queryString = 'SELECT bets.createdTime, bets.endTime, bets.cost, bets.lotId, ca
 $bets = selectData($connectMySQL, $queryString);
 
 identifyTypeVarForlegalizationVarSymbols($bets);
+
+$queryString = 'SELECT name FROM categories ORDER BY id';
+$categories = selectData($connectMySQL, $queryString);
+
+identifyTypeVarForlegalizationVarSymbols($categories);
 
 $navContent = renderTemplate('nav.php', ['categories' => $categories]);
 

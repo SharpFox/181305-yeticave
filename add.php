@@ -34,15 +34,9 @@ $rules = [
         'date'
     ],
     'add-img' => [
-        'validateFile',
-        'specialSymbols'
+        'validateFile'
     ]
 ];
-
-$queryString = 'SELECT name FROM categories ORDER BY id';
-$categories = selectData($connectMySQL, $queryString);
-
-identifyTypeVarForlegalizationVarSymbols($categories);
 
 if (!empty($_POST)) {
     identifyTypeVarForlegalizationVarSymbols($_POST);
@@ -50,6 +44,11 @@ if (!empty($_POST)) {
 if (!empty($_FILES)) {
     identifyTypeVarForlegalizationVarSymbols($_FILES);
 }
+
+$queryString = 'SELECT name FROM categories ORDER BY id';
+$categories = selectData($connectMySQL, $queryString);
+
+identifyTypeVarForlegalizationVarSymbols($categories);
 
 $navContent = renderTemplate('nav.php', ['categories' => $categories]);
 

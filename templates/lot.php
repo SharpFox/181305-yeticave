@@ -28,11 +28,13 @@
                             Мин. ставка <span><?=$lot['currentCost']?></span>
                         </div>
                     </div>
-                    <form class="lot-item__form" action="lot.php?id=<?=$lot['lotId'];?>" method="post">
+                    <form class="lot-item__form<?=!empty($errors) ? ' form--invalid' : '';?>" action="lot.php?id=<?=$lot['lotId'];?>" method="post">
                         <?php if (!$isBetMade):?>   
-                        <p class="lot-item__form-item">
+                        <p class="lot-item__form-item<?=key_exists('cost', $errors) ? ' form__item--invalid' : '';?>">
                             <label for="cost">Ваша ставка</label>
                             <input id="cost" type="number" step="<?=$lot['step']?>" value="<?=$lot['currentCost']?>" name="cost" placeholder="<?=$lot['currentCost']?>">
+                            <span class="form__error"><?=key_exists('cost', $errors) ? implode(', ', $errors['cost']) : ''?></span>
+                            <p></p>
                         </p>
                         <button type="submit" class="button">Сделать ставку</button>
                         <?php endif; ?>

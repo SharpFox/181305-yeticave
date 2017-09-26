@@ -5,11 +5,6 @@ require_once('functions.php');
 require_once('mysql_helper.php');
 require_once('init.php');
 
-$queryString = 'SELECT name FROM categories ORDER BY id';
-$categories = selectData($connectMySQL, $queryString);
-
-identifyTypeVarForlegalizationVarSymbols($categories);
-
 $title = 'Вход';
 $errors = [];
 $rules = [
@@ -26,6 +21,11 @@ $rules = [
 if (!empty($_POST)) {
     identifyTypeVarForlegalizationVarSymbols($_POST);
 }
+
+$queryString = 'SELECT name FROM categories ORDER BY id';
+$categories = selectData($connectMySQL, $queryString);
+
+identifyTypeVarForlegalizationVarSymbols($categories);
 
 $navContent = renderTemplate('nav.php', ['categories' => $categories]);
 

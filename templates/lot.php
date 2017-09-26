@@ -1,53 +1,60 @@
-<?=$navigationMenu;?>
+<main>
+    
+    <?=$navigationMenu;?>
 
-<section class="lot-item container">
-    <h2><?=$goodsContent[$goodsItem]['name']?></h2>
-    <div class="lot-item__content">
-        <div class="lot-item__left">
-            <div class="lot-item__image">
-                <img src=<?=$goodsContent[$goodsItem]['url']?> width="730" height="548" alt=<?=$goodsContent[$goodsItem]['name']?>>
-            </div>
-            <p class="lot-item__category">Категория: <span><?=$goodsContent[$goodsItem]['category']?></span></p>
-            <p class="lot-item__description"><?=$goodsContent[$goodsItem]['description']?></p>
-        </div>
-        <div class="lot-item__right">
-            <?php if ($isAuth): ?> 
-            <div class="lot-item__state">
-                <div class="lot-item__timer timer">
-                    <?=$goodsContent[$goodsItem]['lotTimeRemaining']?>
+    <section class="lot-item container">
+
+        <h2><?=$lot['lotName']?></h2>
+        <div class="lot-item__content">
+            <div class="lot-item__left">
+                <div class="lot-item__image">
+                    <img src=<?=$lot['url']?> width="730" height="548" alt=<?=$lot['lotName']?>>
                 </div>
-                <div class="lot-item__cost-state">
-                    <div class="lot-item__rate">
-                        <span class="lot-item__amount">Текущая цена</span>
-                        <span class="lot-item__cost"><?=$goodsContent[$goodsItem]['cost']?></span>
-                    </div>
-                    <div class="lot-item__min-cost">
-                        Мин. ставка <span><?=$goodsContent[$goodsItem]['cost']?></span>
-                    </div>
-                </div>
-                <form class="lot-item__form" action="lot.php?id=<?=$goodsItem;?>" method="post">
-                    <?php if (!$isBetMade):?>   
-                    <p class="lot-item__form-item">
-                        <label for="cost">Ваша ставка</label>
-                        <input id="cost" type="number" step="<?=$goodsContent[$goodsItem]['step']?>" value="<?=$goodsContent[$goodsItem]['cost']?>" name="cost" placeholder="<?=$goodsContent[$goodsItem]['cost']?>">
-                    </p>
-                    <button type="submit" class="button">Сделать ставку</button>
-                    <?php endif; ?>
-                </form>
+                <p class="lot-item__category">Категория: <span><?=$lot['category']?></span></p>
+                <p class="lot-item__description"><?=$lot['description']?></p>
             </div>
-            <?php endif; ?>
-            <div class="history">
-                <h3>История ставок (<span>4</span>)</h3>
-                <table class="history__list">
-                    <?php foreach($bets as $key => $value): ?>
-                    <tr class="history__item">
-                        <td class="history__name"><?=$value['name']; ?></td>
-                        <td class="history__price"><?=$value['price']; ?> р</td>
-                        <td class="history__time"><?=getHumanTimeOfLastRate($value['ts']); ?></td>                            
-                    </tr>
-                    <?php endforeach; ?>
-                </table>
+            <div class="lot-item__right">
+                <?php if ($isAuth): ?> 
+                <div class="lot-item__state">
+                    <div class="lot-item__timer timer">
+                        <?=getHumanTimeUntilRateEnd($lot['endTime'])?>
+                    </div>
+                    <div class="lot-item__cost-state">
+                        <div class="lot-item__rate">
+                            <span class="lot-item__amount">Текущая цена</span>
+                            <span class="lot-item__cost"><?=$lot['lastCost']?></span>
+                        </div>
+                        <div class="lot-item__min-cost">
+                            Мин. ставка <span><?=$lot['currentCost']?></span>
+                        </div>
+                    </div>
+                    <form class="lot-item__form<?=!empty($errors) ? ' form--invalid' : '';?>" action="lot.php?id=<?=$lot['lotId'];?>" method="post">
+                        <?php if (!$isBetMade):?>   
+                        <p class="lot-item__form-item<?=key_exists('cost', $errors) ? ' form__item--invalid' : '';?>">
+                            <label for="cost">Ваша ставка</label>
+                            <input id="cost" type="number" step="<?=$lot['step']?>" value="<?=$lot['currentCost']?>" name="cost" placeholder="<?=$lot['currentCost']?>">
+                            <span class="form__error"><?=key_exists('cost', $errors) ? implode(', ', $errors['cost']) : ''?></span>
+                            <p></p>
+                        </p>
+                        <button type="submit" class="button">Сделать ставку</button>
+                        <?php endif; ?>
+                    </form>
+                </div>
+                <?php endif; ?>
+                <div class="history">
+                    <h3>История ставок (<span><?=$lot['quantityBets']?></span>)</h3>
+                    <table class="history__list">
+                        <?php foreach($bets as $key => $bet): ?>
+                        <tr class="history__item">
+                            <td class="history__name"><?=$bet['user']; ?></td>
+                            <td class="history__price"><?=$bet['cost']; ?> р</td>
+                            <td class="history__time"><?=getHumanTimeOfLastRate($bet['createdTime']); ?></td>                            
+                        </tr>
+                        <?php endforeach; ?>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+
+</main>

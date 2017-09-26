@@ -6,68 +6,114 @@ require_once('mysql_helper.php');
 require_once('init.php');
 require_once('data.php');
 
-identifyTypeVarForlegalizationVarSymbols($goodsCategory);
-identifyTypeVarForlegalizationVarSymbols($goodsContent);
-identifyTypeVarForlegalizationVarSymbols($lotDefaultDescription);
-identifyTypeVarForlegalizationVarSymbols($defaultRateEndTime);
+$errors = [];
 
-$goodsItem = isset($_GET['id']) ? $_GET['id'] : null;
-$user_bets = [];
-$isBetMade = false;
+$rules = [
+    'cost' => [
+        'required',
+        'numeric',
+        'notNegative'
+    ]
+];
 
-if (isset($_COOKIE['bets'])) {
-    $user_bets = json_decode($_COOKIE['bets'], true);
+$lotId = isset($_GET['id']) ? $_GET['id'] : null;
 
-    foreach($user_bets as $key=> $value) {
-        if ($user_bets[$key]['goodsItem'] === $goodsItem) { 
-            $isBetMade = true;
-        }
-    }    
+$queryString = 'SELECT lots.id AS lotId, lots.name AS lotName, lots.cost AS lastCost, lots.cost + lots.step AS currentCost,
+        lots.url, lots.description, lots.endTime, lots.createdTime, lots.step, lots.quantityBets, categories.name AS category 
+    FROM lots INNER JOIN categories ON lots.categoryId = categories.id
+    WHERE lots.id = ' . $lotId;
+
+$findLot = selectData($connectMySQL, $queryString);
+
+identifyTypeVarForlegalizationVarSymbols($findLot);
+
+$isLotFind = false;
+!findIdInLot($findLot, $isLotFind);
+if (!$isLotFind) {
+    printErrorInfoNotFound();
 }
 
-printErrorInfoNotFound($goodsItem, $goodsContent);
-
-$title = $goodsContent[$goodsItem]['name'];
-$isMainPage = false;
-$descriptionDefaulItem = 0;
-
-$navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
+$lot = [];
+foreach($findLot as $key => $arr) {
+    foreach($arr as $key => $value) {
+        $lot[$key] = $value;
+    }
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $currentLot = [
-        'goodsItem' => $goodsItem,
-        'name' => $goodsContent[$goodsItem]['name'],
-        'category' => $goodsContent[$goodsItem]['category'],
-        'cost' => $_POST['cost'],
-        'url' => $goodsContent[$goodsItem]['url'],
-        'timeBetting' => time(),
-        'lotTimeRemaining' => $goodsContent[$goodsItem]['lotTimeRemaining']
-    ];
+    validateFormFields($rules, $errors);
 
-    array_push($user_bets, $currentLot);
+    if (intval($_POST['cost']) <= $lot['lastCost']) { 
+        $errors['cost'][] = 'Новая ставка не может быть меньше или равна текущей цене лота';     
+    }
+}
 
-    $user_bets_encoded = json_encode($user_bets);
-    header('location: mylots.php');
-    setcookie('bets', $user_bets_encoded, time() + DAY_SECONDS);
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 
+    mysqli_query($connectMySQL, "START TRANSACTION");
+    
+    $lotData = [
+        'createdTime' => date("Y-m-d H:i:s", strtotime($lot['createdTime'])),
+        'endTime' => date("Y-m-d H:i:s", strtotime($lot['endTime'])),
+        'cost' => intval($_POST['cost']),
+        'userId' => isset($_SESSION['user']) ? intval($_SESSION['userId']) : intval(NULL),
+        'lotId' => isset($_GET['id']) ? intval($_GET['id']) : intval(null)
+    ];  
+
+    $betId = insertData($connectMySQL, 'bets', $lotData);
+
+    $queryString = 'UPDATE lots SET cost = ' . intval($_POST['cost']) . ' WHERE lots.id = ' . $lotId . '';    
+    $isLotUpdate = execAnyQuery($connectMySQL, $queryString);
+
+    if ($betId && $isLotUpdate) {
+        mysqli_query($connectMySQL, "COMMIT");
+    }
+    else {
+        mysqli_query($connectMySQL, "ROLLBACK");
+    }
+    
+    header('location: lot.php?id=' . $lotId . '');;
     exit();
 }
 
+$title = $lot['lotName'];
+
+$queryString = 'SELECT bets.cost, bets.createdTime, bets.userId, users.name AS user   
+    FROM bets INNER JOIN users ON bets.userId = users.id INNER JOIN lots ON bets.lotId = lots.id
+    WHERE bets.lotId = ' . $lotId;
+
+$bets = selectData($connectMySQL, $queryString);
+
+identifyTypeVarForlegalizationVarSymbols($bets);
+
+$isBetMade = false;
+
+foreach($bets as $key=> $bet) {
+    if ($bet['userId'] === (isset($_SESSION['userId']) ? $_SESSION['userId'] : NULL)) { 
+        $isBetMade = true;
+        break;
+    }
+}    
+
+$queryString = 'SELECT name FROM categories ORDER BY id';
+$categories = selectData($connectMySQL, $queryString);
+
+identifyTypeVarForlegalizationVarSymbols($categories);
+
+$navContent = renderTemplate('nav.php', ['categories' => $categories]);
+
 $lotVar = [ 
-    'goodsContent' => $goodsContent,
-    'goodsItem' => $goodsItem,
+    'lot' => $lot,
     'navigationMenu' => $navContent,
     'bets' => $bets,
-    'lotDescription' => $lotDefaultDescription,
-    'descriptionDefaulItem' => $descriptionDefaulItem,
-    'rateEndTime' => $defaultRateEndTime,
     'isBetMade' => $isBetMade,
-    'isAuth' => isset($_SESSION['user'])
+    'isAuth' => isset($_SESSION['userId']) ? true : false,
+    'errors' => $errors
 ];
 
 $lotContent = renderTemplate('lot.php', $lotVar);
 
-$layoutContent = renderLayout($lotContent, $navContent, $title, $isMainPage, $userAvatar);
+$layoutContent = renderLayout($lotContent, $navContent, $title);
     
 print($layoutContent);
 ?>

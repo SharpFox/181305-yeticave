@@ -1,0 +1,115 @@
+<?php
+require_once('functions.php');
+require_once('init.php');
+require_once('data.php');
+
+$title = 'Регистрация';
+$errors = [];
+$rules = [
+    'email' => [
+        'required',
+        'email'
+    ],
+    'password' => [
+        'required', 
+        'password'
+    ],
+    'name' => [
+        'required',
+    ],
+    'message' => [
+        'required'
+    ],
+    'add-img' => [
+        'validateFile'
+    ]
+];
+
+$queryString = 'SELECT name FROM categories ORDER BY id';
+$categories = selectData($connectMySQL, $queryString);
+
+identifyTypeVarForlegalizationVarSymbols($categories);
+
+$navContent = renderTemplate('nav.php', ['categories' => $categories]);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST)) {
+    $errors['add-img'][] = 'Возникла непредвиденная ошибка. Возможно, была предпринята попытка загрузки файла
+        очень большого размера';   
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
+    validateFormFields($rules, $errors);
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {   
+    if (isset($_FILES['add-img']['name'])) {
+        $result = loadFileToServer('add-img');
+        
+        if ($result !== NULL) {
+            $errors['add-img'][] = $result;
+        }   
+    }
+
+    $findUser = searchUserByEmail($_POST['email'], $connectMySQL);
+
+    if (!$findUser) {
+    
+        $userData = [
+            'email' => $_POST['email'],
+            'passwordHash' => password_hash($_POST['password'], PASSWORD_BCRYPT),
+            'name' => $_POST['name'],
+            'url' => '/img/' . $_FILES['add-img']['name'],
+            'contacts' => $_POST['message'],
+            'createdTime' => date("Y-m-d H:i:s", time())
+        ];  
+
+        $userId = insertData($connectMySQL, 'users', $userData);
+
+        $queryString = 'SELECT users.id, users.email, users.passwordHash, users.name, users.url, users.contacts, users.createdTime 
+            FROM users
+            WHERE users.id = ' . $userId;
+            
+        $findUser = selectData($connectMySQL, $queryString);
+        
+        identifyTypeVarForlegalizationVarSymbols($findUser);
+
+        $user = [];
+        foreach($findUser as $key => $arr) {
+            foreach($arr as $key => $value) {
+                $user[$key] = $value;
+            }
+        }
+
+        if (empty($user)) {
+            $errors['newUser'][] = 'Не удалось зарегистрировать нового пользователя. Повторите попытку позже.';      
+        }
+    } else {
+        $errors['email'][] = 'Пользователь с таким e-mail адресом уже зарегистрирован'; 
+    }
+    
+    if (!empty($errors)) {
+        $loginVar = [
+            'errors' => $errors,
+            'navigationMenu' => $navContent
+        ];    
+        
+        $mainContent = renderTemplate('sign-up.php', $loginVar);
+    }     
+    else {
+        header('location: login.php');
+        exit;
+    }
+} else {
+
+    $signUpVar = [
+        'navigationMenu' => $navContent,
+        'errors' => $errors
+    ];
+
+    $mainContent = renderTemplate('sign-up.php', $signUpVar);
+}
+
+$layoutContent = renderLayout($mainContent, $navContent, $title);
+    
+print($layoutContent);
+?>

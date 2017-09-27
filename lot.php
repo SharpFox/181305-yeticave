@@ -16,29 +16,27 @@ $rules = [
     ]
 ];
 
-$lotId = isset($_GET['id']) ? $_GET['id'] : null;
+$lotId = isset($_GET['id']) ? intval($_GET['id']) : null;
 
 $queryString = 'SELECT lots.id AS lotId, lots.name AS lotName, lots.cost AS lastCost, lots.cost + lots.step AS currentCost,
         lots.url, lots.description, lots.endTime, lots.createdTime, lots.step, lots.quantityBets, categories.name AS category 
     FROM lots INNER JOIN categories ON lots.categoryId = categories.id
-    WHERE lots.id = ' . $lotId;
+    WHERE lots.id = ?';
+$queryParam = [
+    'id' => $lotId
+];
 
-$findLot = selectData($connectMySQL, $queryString);
-
+$findLot = selectData($connectMySQL, $queryString, $queryParam);
 identifyTypeVarForlegalizationVarSymbols($findLot);
 
 $isLotFind = false;
-!findIdInLot($findLot, $isLotFind);
+findIdInLot($findLot, $isLotFind);
+
 if (!$isLotFind) {
     printErrorInfoNotFound();
 }
 
-$lot = [];
-foreach($findLot as $key => $arr) {
-    foreach($arr as $key => $value) {
-        $lot[$key] = $value;
-    }
-}
+$lot = convertTwoIntoOneDimensionalArray($findLot);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validateFormFields($rules, $errors);
@@ -52,18 +50,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 
     mysqli_query($connectMySQL, "START TRANSACTION");
     
-    $lotData = [
-        'createdTime' => date("Y-m-d H:i:s", strtotime($lot['createdTime'])),
+    $betData = [
+        'createdTime' => date("Y-m-d H:i:s", time()),
         'endTime' => date("Y-m-d H:i:s", strtotime($lot['endTime'])),
         'cost' => intval($_POST['cost']),
         'userId' => isset($_SESSION['user']) ? intval($_SESSION['userId']) : intval(NULL),
         'lotId' => isset($_GET['id']) ? intval($_GET['id']) : intval(null)
     ];  
 
-    $betId = insertData($connectMySQL, 'bets', $lotData);
+    $betId = insertData($connectMySQL, 'bets', $betData);
 
-    $queryString = 'UPDATE lots SET cost = ' . intval($_POST['cost']) . ' WHERE lots.id = ' . $lotId . '';    
-    $isLotUpdate = execAnyQuery($connectMySQL, $queryString);
+    $queryString = 'UPDATE lots SET cost = ? WHERE lots.id = ?';  
+    $queryParam = [
+        'cost' => intval($_POST['cost']),
+        'id' => $lotId
+    ];
+
+    $isLotUpdate = execAnyQuery($connectMySQL, $queryString, $queryParam);
 
     if ($betId && $isLotUpdate) {
         mysqli_query($connectMySQL, "COMMIT");
@@ -80,24 +83,24 @@ $title = $lot['lotName'];
 
 $queryString = 'SELECT bets.cost, bets.createdTime, bets.userId, users.name AS user   
     FROM bets INNER JOIN users ON bets.userId = users.id INNER JOIN lots ON bets.lotId = lots.id
-    WHERE bets.lotId = ' . $lotId;
+    WHERE bets.lotId = ?';
+$queryParam = [
+    'lotId' => $lotId
+];
 
-$bets = selectData($connectMySQL, $queryString);
-
+$bets = selectData($connectMySQL, $queryString, $queryParam);
 identifyTypeVarForlegalizationVarSymbols($bets);
 
 $isBetMade = false;
 
 foreach($bets as $key=> $bet) {
-    if ($bet['userId'] === (isset($_SESSION['userId']) ? $_SESSION['userId'] : NULL)) { 
+    if (intval($bet['userId']) === (isset($_SESSION['userId']) ? intval($_SESSION['userId']) : NULL)) { 
         $isBetMade = true;
         break;
     }
 }    
 
-$queryString = 'SELECT name FROM categories ORDER BY id';
-$categories = selectData($connectMySQL, $queryString);
-
+$categories = getCategories($connectMySQL);
 identifyTypeVarForlegalizationVarSymbols($categories);
 
 $navContent = renderTemplate('nav.php', ['categories' => $categories]);

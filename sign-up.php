@@ -1,4 +1,6 @@
 <?php
+header('Content-Type: text/html; charset=utf-8');
+
 require_once('functions.php');
 require_once('init.php');
 require_once('data.php');
@@ -25,9 +27,7 @@ $rules = [
     ]
 ];
 
-$queryString = 'SELECT name FROM categories ORDER BY id';
-$categories = selectData($connectMySQL, $queryString);
-
+$categories = getCategories($connectMySQL);
 identifyTypeVarForlegalizationVarSymbols($categories);
 
 $navContent = renderTemplate('nav.php', ['categories' => $categories]);
@@ -49,11 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
             $errors['add-img'][] = $result;
         }   
     }
+}
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {  
     $findUser = searchUserByEmail($_POST['email'], $connectMySQL);
 
-    if (!$findUser) {
-    
+    if (empty($findUser)) {    
         $userData = [
             'email' => $_POST['email'],
             'passwordHash' => password_hash($_POST['password'], PASSWORD_BCRYPT),
@@ -67,18 +68,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
 
         $queryString = 'SELECT users.id, users.email, users.passwordHash, users.name, users.url, users.contacts, users.createdTime 
             FROM users
-            WHERE users.id = ' . $userId;
-            
-        $findUser = selectData($connectMySQL, $queryString);
+            WHERE users.id = ?';           
+        $queryParam = [
+            'id' => $userId
+        ];
         
+        $findUser = selectData($connectMySQL, $queryString, $queryParam);        
         identifyTypeVarForlegalizationVarSymbols($findUser);
 
-        $user = [];
-        foreach($findUser as $key => $arr) {
-            foreach($arr as $key => $value) {
-                $user[$key] = $value;
-            }
-        }
+        $user = convertTwoIntoOneDimensionalArray($findUser);
 
         if (empty($user)) {
             $errors['newUser'][] = 'Не удалось зарегистрировать нового пользователя. Повторите попытку позже.';      
@@ -100,7 +98,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         exit;
     }
 } else {
-
     $signUpVar = [
         'navigationMenu' => $navContent,
         'errors' => $errors

@@ -22,9 +22,7 @@ if (!empty($_POST)) {
     identifyTypeVarForlegalizationVarSymbols($_POST);
 }
 
-$queryString = 'SELECT name FROM categories ORDER BY id';
-$categories = selectData($connectMySQL, $queryString);
-
+$categories = getCategories($connectMySQL);
 identifyTypeVarForlegalizationVarSymbols($categories);
 
 $navContent = renderTemplate('nav.php', ['categories' => $categories]);

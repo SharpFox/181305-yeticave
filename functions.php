@@ -29,8 +29,7 @@ startSession();
 * @param string $userAvatar
 * @return string
 */
-function renderLayout($mainContent, $navContent, $title) {
-    
+function renderLayout($mainContent, $navContent, $title) {    
     $layoutVar = [ 
         'content' => $mainContent,
         'navigationMenu' => $navContent,
@@ -48,7 +47,6 @@ function renderLayout($mainContent, $navContent, $title) {
 * @param any $incomingData
 */
 function identifyTypeVarForlegalizationVarSymbols(& $incomingData) {
-
     if (gettype($incomingData) === 'boolean' || gettype($incomingData) === 'integer'
         || gettype($incomingData) === 'double' || gettype($incomingData) === 'string') {        
             makeSymbolsLegal($incomingData);
@@ -57,7 +55,7 @@ function identifyTypeVarForlegalizationVarSymbols(& $incomingData) {
     }
 
     if (gettype($incomingData) === 'array') {
-        $incomingData = makeSymbolsLegalInArray($incomingData, 'makeSymbolsLegal');
+        $incomingData = applyFunctionToArrayElements($incomingData, 'makeSymbolsLegal');
     }     
 }
 
@@ -69,15 +67,13 @@ function identifyTypeVarForlegalizationVarSymbols(& $incomingData) {
 * @param string $funcName 
 * @return mixed
 */
-function makeSymbolsLegalInArray($arr, $funcName) {
+function applyFunctionToArrayElements($arr, $funcName) {
     $result = [];
 
     foreach ($arr as $key => $value) {
         if(is_array($value)) {
-            $ret = makeSymbolsLegalInArray($value, $funcName);
-            if(count($ret)) $result[] = $ret;
-
-            
+            $ret = applyFunctionToArrayElements($value, $funcName);
+            if(count($ret)) $result[$key] = $ret;            
         } else {
             $result[$key] = call_user_func($funcName, $arr[$key]);
         }
@@ -93,7 +89,11 @@ function makeSymbolsLegalInArray($arr, $funcName) {
 * @param any $incomingData
 */
 function makeSymbolsLegal($incomingData) {
-    return trim(htmlspecialchars($incomingData));
+    if (gettype($incomingData) === 'string') {
+        return trim(htmlspecialchars($incomingData));
+    }
+
+    return $incomingData;
 }
 
 
@@ -167,11 +167,15 @@ function getHumanTimeOfLastRate($time) {
         return date('j', $time) . ' дней назад';
     }
     
-    if ($time < DAY_SECONDS && $time >= HOUR_SECONDS) {
+    if ($time >= HOUR_SECONDS && $time < DAY_SECONDS) {
         return  date('G', $time) . ' часов назад';
     }
+
+    if ($time >= MINUTE_SECONDS  && $time < HOUR_SECONDS) {
+        return date('i', $time) . ' минут назад';
+    }
     
-    return date('i', $time) . ' минут назад';
+    return 'сейчас';
 }
 
 /**
@@ -188,11 +192,15 @@ function getHumanTimeUntilRateEnd($time) {
         return date('j', $time) . ' дня';
     }
     
-    if ($time < DAY_SECONDS && $time >= HOUR_SECONDS) {
+    if ($time >= HOUR_SECONDS && $time < DAY_SECONDS) {
         return  date('G', $time) . ' часов';
     }
+
+    if ($time >= MINUTE_SECONDS  && $time < HOUR_SECONDS) {
+        return date('i', $time) . ' минут';
+    }
     
-    return date('i', $time) . ' минут';
+    return 'уже вот вот';
 }
 
 /**
@@ -208,7 +216,6 @@ function printErrorInfoNotFound() {
 
 /*
 * Проверяет существование сессии.
-*
 */
 function checkSessionAccess() {
     if (isset($_SESSION['user'])) {
@@ -238,6 +245,9 @@ function validateFormFields($rules, &$errors) {
                     $errors[$key][] = 'Данные не соответствуют типу Число';
                 } 
                 if ($subRule === 'notNegative' && filter_var($_POST[$key], FILTER_VALIDATE_FLOAT) && $_POST[$key] < 0) {
+                    $errors[$key][] = 'Значение не может быть отрицательным';
+                } 
+                if ($subRule === 'notNull' && filter_var($_POST[$key], FILTER_VALIDATE_FLOAT) && $_POST[$key] === 0) {
                     $errors[$key][] = 'Значение не может быть отрицательным';
                 } 
                 if ($subRule === 'date' && date("d.m.Y", strtotime($_POST[$key])) !== $_POST[$key]) {
@@ -356,7 +366,6 @@ function getUserMenuVar() {
 * @param array $connectMySQL
 */
 function authorizeUser(&$errors, $connectMySQL) {
-
     $findUser = searchUserByEmail($_POST['email'], $connectMySQL);
 
     $user = [];
@@ -380,12 +389,40 @@ function authorizeUser(&$errors, $connectMySQL) {
 
     $_SESSION['user'] = $user['name'];
     $_SESSION['email'] = $user['email'];
-    $_SESSION['userId'] = $user['id'];
+    $_SESSION['userId'] = intval($user['id']);
     $_SESSION['avatarUrl'] = $user['url'];
 
     header("Location: index.php");
 
     return;
+}
+
+/**
+* Рекурсивно обходит массив и редактирует
+* символы, если это необходимо.
+*
+* @param array $arr 
+* @param string $funcName 
+* @param array $connect 
+* @return mixed
+*/
+function doRealEscapeStringToArrayElements($arr, $funcName, $connect) {
+    $result = [];
+
+    foreach ($arr as $key => $value) {
+        if(is_array($value)) {
+            $ret = applyFunctionToArrayElements($value, $funcName, $connect);
+            if(count($ret)) $result[] = $ret;            
+        } else {
+            if (gettype($arr[$key]) === 'string') {
+                $result[$key] = call_user_func($funcName, $connect, $arr[$key]);
+                continue;
+            }
+            $result[$key] = $arr[$key];          
+        }
+    }
+
+    return $result;
 }
 
 /**
@@ -397,6 +434,10 @@ function authorizeUser(&$errors, $connectMySQL) {
 * @return array
 */
 function selectData($connect, $query, $data = []) {
+    if (!empty($data)) {
+        $data = doRealEscapeStringToArrayElements($data, 'mysqli_real_escape_string', $connect);
+    }
+
     $selectedData = [];    
     $stmt = db_get_prepare_stmt($connect, $query, $data);
     
@@ -420,7 +461,11 @@ function selectData($connect, $query, $data = []) {
 * @param array $data
 * @return mixed
 */
-function insertData($connect, $tableName, $data = []) {
+function insertData($connect, $tableName, $data = []) {    
+    if (!empty($data)) {
+        $data = doRealEscapeStringToArrayElements($data, 'mysqli_real_escape_string', $connect);
+    }
+
     $result = false;
     $placeholderArr = [];
 
@@ -453,7 +498,11 @@ function insertData($connect, $tableName, $data = []) {
 * @param array $data
 * @return array
 */
-function execAnyQuery($connect, $query, $data = []) {    
+function execAnyQuery($connect, $query, $data = []) {
+    if (!empty($data)) {
+        $data = doRealEscapeStringToArrayElements($data, 'mysqli_real_escape_string', $connect);
+    }      
+      
     $result = false;
 
     $stmt = db_get_prepare_stmt($connect, $query, $data);
@@ -463,5 +512,34 @@ function execAnyQuery($connect, $query, $data = []) {
     } 
 
     return mysqli_stmt_execute($stmt);
+}
+
+/**
+* Возвращает результат запроса категорий лотов.
+*
+* @param array $connectMySQL
+* @return array
+*/
+function getCategories($connectMySQL) {
+    $queryString = 'SELECT name FROM categories ORDER BY id';
+    return selectData($connectMySQL, 'SELECT name FROM categories ORDER BY id');
+}
+
+/**
+* Конвертирует первый массив двумерного массива в одномерный.
+*
+* @param array $incomingArr
+* @return array
+*/
+function convertTwoIntoOneDimensionalArray($incomingArr) {
+    $result = [];
+
+    foreach($incomingArr as $key => $arr) {
+        foreach($arr as $key => $value) {
+            $result[$key] = $value;
+        }
+    }
+
+    return $result;
 }
 ?>

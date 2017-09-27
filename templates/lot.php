@@ -15,6 +15,7 @@
             </div>
             <div class="lot-item__right">
                 <?php if ($isAuth): ?> 
+                <?php if (!$isBetMade):?> 
                 <div class="lot-item__state">
                     <div class="lot-item__timer timer">
                         <?=getHumanTimeUntilRateEnd($lot['endTime'])?>
@@ -29,7 +30,7 @@
                         </div>
                     </div>
                     <form class="lot-item__form<?=!empty($errors) ? ' form--invalid' : '';?>" action="lot.php?id=<?=$lot['lotId'];?>" method="post">
-                        <?php if (!$isBetMade):?>   
+ 
                         <p class="lot-item__form-item<?=key_exists('cost', $errors) ? ' form__item--invalid' : '';?>">
                             <label for="cost">Ваша ставка</label>
                             <input id="cost" type="number" step="<?=$lot['step']?>" value="<?=$lot['currentCost']?>" name="cost" placeholder="<?=$lot['currentCost']?>">
@@ -37,9 +38,10 @@
                             <p></p>
                         </p>
                         <button type="submit" class="button">Сделать ставку</button>
-                        <?php endif; ?>
+
                     </form>
                 </div>
+                <?php endif; ?>
                 <?php endif; ?>
                 <div class="history">
                     <h3>История ставок (<span><?=$lot['quantityBets']?></span>)</h3>

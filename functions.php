@@ -1,9 +1,5 @@
 <?php 
-date_default_timezone_set('Europe/Moscow');
-
-define("NAME_TEMPLATES_PATH", 'templates/'); 
-define("FILE_IMAGE_PATH", __DIR__ . '/img/');
-define("FILE_MAX_SIZE", 1048576);
+require_once('data.php');
 
 /**
 * Запускает сессию. Выкидывает исключение и,
@@ -19,8 +15,6 @@ function startSession() {
 
     throw "Не удалось открыть сессию. Обновите страницу.";
 }
-
-startSession();
 
 /**
 * Формирует конечную версию html-страницы.
@@ -300,8 +294,8 @@ function validateFile($attributeValue) {
 
     $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES[$attributeValue]['tmp_name']);
 
-    if ($type !== 'image/jpeg') {
-        $result = 'Загрузите картинку в формате jpeg';   
+    if ($type !== 'image/jpeg' && $type !== 'image/jpg' && $type !== 'image/png') {
+        $result = 'Загрузите картинку в формате jpeg/jpg/png';   
     }
 
     if ($_FILES[$attributeValue]['size'] > $maxSize) {

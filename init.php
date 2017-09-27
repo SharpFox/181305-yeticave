@@ -30,4 +30,6 @@ if(!$connectMySQL) {
 
     exit();
 }
+
+startSession();
 ?>

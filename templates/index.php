@@ -1,4 +1,5 @@
 <main class="container">
+
     <section class="promo">
         <h2 class="promo__title">Нужен стафф для катки?</h2>
         <p class="promo__text">На нашем интернет-аукционе ты найдёшь самое эксклюзивное сноубордическое и горнолыжное снаряжение.</p>
@@ -27,6 +28,7 @@
         <div class="lots__header">
             <h2>Открытые лоты</h2>
             <select class="lots__select">
+                <option>Все категории</option>
                 <?php foreach($categories as $category)
                     foreach($category as $value): ?>
                     <option><?=$value;?></option>   
@@ -37,4 +39,5 @@
             <?=$lotsItemContent;?>
         </ul>
     </section>
+    
 </main>

@@ -9,7 +9,7 @@
       <tr class="rates__item">
         <td class="rates__info">
           <div class="rates__img">
-            <img src=<?=$value['lotsUrl'];?> width="54" height="40" alt=<?=$value['category'];?>>
+            <img src=<?=$value['lotsUrl'];?> width="54" height="40" alt=<?=$value['lotName'];?>>
           </div>
           <div>
             <h3 class="rates__title"><a href="lot.php?id=<?=$value['lotId'];?>"><?=$value['lotName'];?></a></h3>

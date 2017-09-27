@@ -1,6 +1,4 @@
 <?php
-header('Content-Type: text/html; charset=utf-8');
-
 require_once('functions.php');
 require_once('mysql_helper.php');
 require_once('init.php');
@@ -60,9 +58,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 
     $betId = insertData($connectMySQL, 'bets', $betData);
 
-    $queryString = 'UPDATE lots SET cost = ? WHERE lots.id = ?';  
+    $queryString = 'UPDATE lots SET cost = ?, quantityBets = ? WHERE lots.id = ?';  
     $queryParam = [
         'cost' => intval($_POST['cost']),
+        'quantityBets' => $lot['quantityBets'] + 1,
         'id' => $lotId
     ];
 

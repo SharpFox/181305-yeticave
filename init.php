@@ -11,6 +11,12 @@ define("PORT_MYSQL", NULL);
 
 $connectMySQL = mysqli_connect(IP_MYSQL, USERNAME_MYSQL, PASSWORD_MYSQL, DATABASENAME_MYSQL, PORT_MYSQL);
 
+if (!mysqli_set_charset($connectMySQL, "utf8")) {
+    printf("Ошибка при загрузке набора символов utf8: %s\n", mysqli_error($connectMySQL));
+    
+    exit();
+} 
+
 if(!$connectMySQL) {
     $title = 'Вход';
     $isMainPage = false;

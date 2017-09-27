@@ -77,7 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {  
-    $queryString = 'SELECT id FROM categories WHERE name = ?';    
+    $queryString = 'SELECT id 
+                    FROM categories 
+                    WHERE name = ?';    
     $queryParam = [
         'category' => $_POST['category']
     ];
@@ -99,10 +101,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
 
     $lotId = insertData($connectMySQL, 'lots', $lotData);
 
-    $queryString = 'SELECT lots.id AS lotId, lots.name AS lotName, lots.cost AS lastCost, lots.step, lots.cost + lots.step AS currentCost, lots.url, lots.description,
-            lots.endTime, lots.quantityBets, categories.name AS category 
-        FROM lots INNER JOIN categories ON lots.categoryId = categories.id
-        WHERE lots.id = ?';        
+    $queryString = 'SELECT lots.id AS lotId, 
+                        lots.name AS lotName, 
+                        lots.cost AS lastCost, 
+                        lots.step, lots.cost + lots.step AS currentCost, 
+                        lots.url, lots.description,
+                        lots.endTime, 
+                        lots.quantityBets, 
+                        categories.name AS category 
+                    FROM lots 
+                    INNER JOIN categories ON lots.categoryId = categories.id
+                    WHERE lots.id = ?';        
     $queryParam = [
         'category' => $lotId
     ];

@@ -1,6 +1,4 @@
 <?php
-header('Content-Type: text/html; charset=utf-8');
-
 require_once('functions.php');
 require_once('mysql_helper.php');
 require_once('init.php');
@@ -12,12 +10,18 @@ if (!isset($_SESSION['userId'])) {
 
 $title = 'Мои ставки';
 
-$queryString = 'SELECT bets.createdTime, bets.endTime, bets.cost, bets.lotId, categories.name AS category, lots.name AS lotName, lots.url AS lotsUrl
-    FROM bets 
-    INNER JOIN lots ON bets.lotId = lots.id 
-    INNER JOIN categories ON lots.categoryId = categories.id 
-    INNER JOIN users ON bets.userId = users.id
-    WHERE users.email = ?';
+$queryString = 'SELECT bets.createdTime, 
+                    bets.endTime, 
+                    bets.cost, 
+                    bets.lotId, 
+                    categories.name AS category, 
+                    lots.name AS lotName, 
+                    lots.url AS lotsUrl
+                FROM bets 
+                INNER JOIN lots ON bets.lotId = lots.id 
+                INNER JOIN categories ON lots.categoryId = categories.id 
+                INNER JOIN users ON bets.userId = users.id
+                WHERE users.email = ?';
 $queryParam = [
     'email' => $_SESSION['email']
 ];

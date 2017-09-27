@@ -6,9 +6,8 @@ INSERT INTO users (email, passwordHash, name, url, contacts, createdTime) VALUES
     ('kitty_93@li.ru','$2y$10$bWtSjUhwgggtxrnJ7rxmIe63ABubHQs0AS0hgnOo41IEdMHkYoSVa','Леночка','img/user.jpg', '','2017-05-19 12:42:01'),
     ('warrior07@mail.ru','$2y$10$2OxpEH7narYpkOT1H5cApezuzh10tZEEQ2axgFOaKW.55LxIJBgWW','Руслан','img/user.jpg', 'i@mail.ru','2017-09-22 01:56:04');
 
-/* Категории*/
+/* Категории  */
 INSERT INTO categories (name) VALUES 
-    ('Все категории'),
     ('Доски и лыжи'),
     ('Крепления'),
     ('Ботинки'),

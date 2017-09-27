@@ -1,6 +1,4 @@
 <?php
-header('Content-Type: text/html; charset=utf-8');
-
 require_once('functions.php');
 require_once('init.php');
 require_once('data.php');
@@ -66,9 +64,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
 
         $userId = insertData($connectMySQL, 'users', $userData);
 
-        $queryString = 'SELECT users.id, users.email, users.passwordHash, users.name, users.url, users.contacts, users.createdTime 
-            FROM users
-            WHERE users.id = ?';           
+        $queryString = 'SELECT users.id, 
+                            users.email, 
+                            users.passwordHash, 
+                            users.name, 
+                            users.url, 
+                            users.contacts, 
+                            users.createdTime 
+                        FROM users
+                        WHERE users.id = ?';           
         $queryParam = [
             'id' => $userId
         ];

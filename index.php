@@ -5,11 +5,19 @@ require_once('init.php');
 require_once('data.php');
 
 $title = 'Главная';
-$currentTimeMinusOneDay = date("Y-m-d H:i:s", time() - 86400);
+$currentTimeMinusOneDay = date("Y-m-d H:i:s", time() - DAY_SECONDS);
 
-$queryString = 'SELECT lots.id, lots.name, lots.cost, lots.url, lots.endTime, lots.createdTime, categories.name AS category 
-    FROM lots INNER JOIN categories ON lots.categoryId = categories.id
-    WHERE lots.endTime > ? ORDER BY lots.createdTime DESC';
+$queryString = 'SELECT lots.id, 
+                    lots.name, 
+                    lots.cost, 
+                    lots.url, 
+                    lots.endTime, 
+                    lots.createdTime, 
+                    categories.name AS category 
+                FROM lots 
+                INNER JOIN categories ON lots.categoryId = categories.id
+                WHERE lots.endTime > ? 
+                ORDER BY lots.createdTime DESC';
 $queryParam = [
     'category' => $currentTimeMinusOneDay
 ];

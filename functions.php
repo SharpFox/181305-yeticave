@@ -2,6 +2,8 @@
 date_default_timezone_set('Europe/Moscow');
 
 define("NAME_TEMPLATES_PATH", 'templates/'); 
+define("FILE_IMAGE_PATH", __DIR__ . '/img/');
+define("FILE_MAX_SIZE", 1048576);
 
 /**
 * Запускает сессию. Выкидывает исключение и,
@@ -73,7 +75,10 @@ function applyFunctionToArrayElements($arr, $funcName) {
     foreach ($arr as $key => $value) {
         if(is_array($value)) {
             $ret = applyFunctionToArrayElements($value, $funcName);
-            if(count($ret)) $result[$key] = $ret;            
+            
+            if(count($ret)) {
+                $result[$key] = $ret;   
+            }         
         } else {
             $result[$key] = call_user_func($funcName, $arr[$key]);
         }
@@ -287,7 +292,7 @@ function validateFormFields($rules, &$errors) {
 */
 function validateFile($attributeValue) {
     $result = null;
-    $maxSize = 1048576;
+    $maxSize = FILE_MAX_SIZE;
 
     if (empty($_FILES[$attributeValue]['tmp_name'])) {
         return "Файл не выбран";    
@@ -314,7 +319,7 @@ function validateFile($attributeValue) {
 */
 function loadFileToServer($attributeValue) {  
     $result = null;    
-    $filePath = __DIR__ . '/img/';
+    $filePath = FILE_IMAGE_PATH;
     $fileInfo = pathinfo($_FILES[$attributeValue]['name']);
     $fileName = $fileInfo['filename'] . "_" . strval(time()) . "." . $fileInfo['extension'];    
     $_FILES[$attributeValue]['name'] = $fileName; 
@@ -337,8 +342,18 @@ function loadFileToServer($attributeValue) {
 * @return array
 */
 function searchUserByEmail($email, $connectMySQL) {
-    $queryString = 'SELECT id, email, name, url, passwordHash FROM users WHERE email = "' . $email . '"';
-    return selectData($connectMySQL, $queryString);
+    $queryString = 'SELECT id,
+                        email,
+                        name, 
+                        url, 
+                        passwordHash 
+                    FROM users 
+                    WHERE email = ?';
+    $queryParam = [
+        'email' => $email
+    ];
+
+    return selectData($connectMySQL, $queryString, $queryParam);
 }
 
 /**
@@ -412,7 +427,10 @@ function doRealEscapeStringToArrayElements($arr, $funcName, $connect) {
     foreach ($arr as $key => $value) {
         if(is_array($value)) {
             $ret = applyFunctionToArrayElements($value, $funcName, $connect);
-            if(count($ret)) $result[] = $ret;            
+           
+            if(count($ret)) {
+                $result[] = $ret;  
+            }          
         } else {
             if (gettype($arr[$key]) === 'string') {
                 $result[$key] = call_user_func($funcName, $connect, $arr[$key]);
@@ -475,7 +493,8 @@ function insertData($connect, $tableName, $data = []) {
         $placeholderArr[] = '?';
     }
 
-    $query = "INSERT INTO " . $tableName . " (" . implode(', ', $keysArr) . ") VALUES (" . implode(', ', $placeholderArr) . ")";
+    $query = "INSERT INTO " . $tableName . " (" . implode(', ', $keysArr) . ") VALUES 
+                (" . implode(', ', $placeholderArr) . ")";
 
     $stmt = db_get_prepare_stmt($connect, $query, $data);
 
@@ -521,8 +540,10 @@ function execAnyQuery($connect, $query, $data = []) {
 * @return array
 */
 function getCategories($connectMySQL) {
-    $queryString = 'SELECT name FROM categories ORDER BY id';
-    return selectData($connectMySQL, 'SELECT name FROM categories ORDER BY id');
+    $queryString = 'SELECT name 
+                    FROM categories 
+                    ORDER BY id';
+    return selectData($connectMySQL, $queryString);
 }
 
 /**

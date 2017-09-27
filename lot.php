@@ -16,10 +16,20 @@ $rules = [
 
 $lotId = isset($_GET['id']) ? intval($_GET['id']) : null;
 
-$queryString = 'SELECT lots.id AS lotId, lots.name AS lotName, lots.cost AS lastCost, lots.cost + lots.step AS currentCost,
-        lots.url, lots.description, lots.endTime, lots.createdTime, lots.step, lots.quantityBets, categories.name AS category 
-    FROM lots INNER JOIN categories ON lots.categoryId = categories.id
-    WHERE lots.id = ?';
+$queryString = 'SELECT lots.id AS lotId, 
+                    lots.name AS lotName, 
+                    lots.cost AS lastCost, 
+                    lots.cost + lots.step AS currentCost,
+                    lots.url, 
+                    lots.description, 
+                    lots.endTime, 
+                    lots.createdTime, 
+                    lots.step, 
+                    lots.quantityBets, 
+                    categories.name AS category 
+                FROM lots 
+                INNER JOIN categories ON lots.categoryId = categories.id
+                WHERE lots.id = ?';
 $queryParam = [
     'id' => $lotId
 ];
@@ -58,7 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 
     $betId = insertData($connectMySQL, 'bets', $betData);
 
-    $queryString = 'UPDATE lots SET cost = ?, quantityBets = ? WHERE lots.id = ?';  
+    $queryString = 'UPDATE lots 
+                    SET cost = ?, quantityBets = ? 
+                    WHERE lots.id = ?';  
     $queryParam = [
         'cost' => intval($_POST['cost']),
         'quantityBets' => $lot['quantityBets'] + 1,
@@ -80,9 +92,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 
 $title = $lot['lotName'];
 
-$queryString = 'SELECT bets.cost, bets.createdTime, bets.userId, users.name AS user   
-    FROM bets INNER JOIN users ON bets.userId = users.id INNER JOIN lots ON bets.lotId = lots.id
-    WHERE bets.lotId = ?';
+$queryString = 'SELECT bets.cost, 
+                    bets.createdTime, 
+                    bets.userId, 
+                    users.name AS user   
+                FROM bets 
+                INNER JOIN users ON bets.userId = users.id 
+                INNER JOIN lots ON bets.lotId = lots.id
+                WHERE bets.lotId = ?';
 $queryParam = [
     'lotId' => $lotId
 ];

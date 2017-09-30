@@ -1,5 +1,6 @@
 <?php 
 require_once('data.php');
+require_once('vendor/autoload.php');
 
 /**
 * Запускает сессию. Выкидывает исключение и,

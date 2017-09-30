@@ -6,20 +6,34 @@ require_once('data.php');
 
 $title = 'Главная';
 $currentTimeMinusOneDay = date("Y-m-d H:i:s", time() - DAY_SECONDS);
+$lotsNumberPage = 3;
+$currentPage = isset($_GET['page']) ? intval($_GET['page']) : 1;
 
-$queryString = 'SELECT lots.id, 
+$queryString = 'SELECT count(lots.id) AS count 
+                    FROM lots;';
+
+$lotsCount = selectData($connectMySQL, $queryString);
+
+$lotsCount = convertTwoIntoOneDimensionalArray($lotsCount);
+
+$pageCount = intval(ceil($lotsCount['count'] / $lotsNumberPage));
+$offset = ($currentPage - 1) * $lotsNumberPage;
+$pages = range(1, $pageCount);
+
+$queryString =  'SELECT lots.id, 
                     lots.name, 
                     lots.cost, 
                     lots.url, 
                     lots.endTime, 
                     lots.createdTime, 
-                    categories.name AS category 
-                FROM lots 
+                    categories.name AS category
+                FROM lots
                 INNER JOIN categories ON lots.categoryId = categories.id
-                WHERE lots.endTime > ? 
-                ORDER BY lots.createdTime DESC';
+                ORDER BY lots.createdTime DESC
+                LIMIT ? OFFSET ?;';
 $queryParam = [
-    'category' => $currentTimeMinusOneDay
+    'lotsNumberPage' => $lotsNumberPage,
+    'offset' => $offset
 ];
 
 $lots = selectData($connectMySQL, $queryString, $queryParam);
@@ -30,14 +44,22 @@ identifyTypeVarForlegalizationVarSymbols($categories);
 
 $navContent = renderTemplate('nav.php', ['categories' => $categories]);
 
-$lotsItemContent = renderTemplate('lots-item.php', ['lots' => $lots]); 
+$lotsItemContent = renderTemplate('lots-item.php', ['lots' => $lots]);
+
+$paginatorVar = [
+    'pages' => $pages,
+    'pageCount' => $pageCount,
+    'currentPage' => $currentPage
+];
+$paginatorContent = renderTemplate('paginator.php', $paginatorVar);
 
 $indexVar = [ 
     'categories' => $categories,
-    'lotsItemContent' => $lotsItemContent    
+    'lotsItemContent' => $lotsItemContent,
+    'paginatorContent' => $paginatorContent    
 ];
-
 $indexContent = renderTemplate('index.php', $indexVar);
+
 $layoutContent = renderLayout($indexContent, $navContent, $title);
 
 print($layoutContent);

@@ -38,6 +38,9 @@
         <ul class="lots__list">
             <?=$lotsItemContent;?>
         </ul>
+
+        <?=$paginatorContent?>
+        
     </section>
     
 </main>

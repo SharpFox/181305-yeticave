@@ -1,9 +1,7 @@
 <?php
-header('Content-Type: text/html; charset=utf-8');
-
 require_once('functions.php');
 require_once('init.php');
-require_once('data.php');
+require_once('config.php');
 
 checkSessionAccess();
 
@@ -126,7 +124,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
     $findLot = selectData($connectMySQL, $queryString, $queryParam);    
     identifyTypeVarForlegalizationVarSymbols($findLot);
 
-    $lot = convertTwoIntoOneDimensionalArray($findLot);
+    $lot = array_shift($findLot);
+    if ($lot === NULL) {
+        $lot = [];
+    }
 
     $currentUserId = isset($_SESSION['userId']) ? intval($_SESSION['userId']) : 0;
     $isCurrentUserAuthor = ($lot['authorId'] === $currentUserId) ? true : false;

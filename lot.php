@@ -2,7 +2,7 @@
 require_once('functions.php');
 require_once('mysql_helper.php');
 require_once('init.php');
-require_once('data.php');
+require_once('config.php');
 
 $errors = [];
 
@@ -45,7 +45,10 @@ if (!$isLotFind) {
     printErrorInfoNotFound();
 }
 
-$lot = convertTwoIntoOneDimensionalArray($findLot);
+$lot = array_shift($findLot);
+if ($lot === NULL) {
+    $lot = [];
+}
 
 $currentUserId = isset($_SESSION['userId']) ? intval($_SESSION['userId']) : 0;
 $isCurrentUserAuthor = ($lot['authorId'] === $currentUserId) ? true : false;

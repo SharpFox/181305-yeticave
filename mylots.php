@@ -2,10 +2,10 @@
 require_once('functions.php');
 require_once('mysql_helper.php');
 require_once('init.php');
-require_once('data.php');
+require_once('config.php');
 
 if (!isset($_SESSION['userId'])) {
-    printErrorInfoForbidden();
+    checkSessionAccess();
 }
 
 $title = 'Мои ставки';
@@ -16,7 +16,8 @@ $queryString = 'SELECT bets.createdTime,
                     categories.name AS category, 
                     lots.name AS lotName, 
                     lots.url AS lotsUrl,
-                    lots.endTime
+                    lots.endTime,
+                    lots.winnerId
                 FROM bets 
                 INNER JOIN lots ON bets.lotId = lots.id 
                 INNER JOIN categories ON lots.categoryId = categories.id 

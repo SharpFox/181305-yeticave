@@ -6,25 +6,30 @@ $queryString = 'SELECT id
         WHERE endTime <= NOW() 
             AND winnerId is null;';
 
-$lots = selectData($connectMySQL, $queryString);
-identifyTypeVarForlegalizationVarSymbols($lots);
+$findLots = selectData($connectMySQL, $queryString);
+identifyTypeVarForlegalizationVarSymbols($findLots);
 
-$lots = convertTwoIntoOneDimensionalArray($lots);
+$lots = array_shift($findLots);
+if ($lots === NULL) {
+    $lots = [];
+}
 
-$queryString = 'SELECT max(bets.cost) AS betCost, 
+$queryString = 'SELECT bets.cost AS betCost, 
                     users.name AS userName, 
                     users.email AS userEmail, 
                     users.id AS userId, 
                     lots.id AS lotId,
                     lots.name AS lotName
                 FROM bets
-                INNER JOIN lots ON bets.lotId = lots.id
-                INNER JOIN users ON bets.userId = users.id
-                WHERE bets.lotId = ?;';
+                LEFT JOIN lots ON bets.lotId = lots.id
+                LEFT JOIN users ON bets.userId = users.id
+                WHERE bets.lotId = ?
+                ORDER BY bets.cost DESC';
       
 foreach ($lots as $lot) {
-    $winner = selectData($connectMySQL, $queryString, ['lotId' => $lot]);
-    array_push($winners, convertTwoIntoOneDimensionalArray($winner)); 
+    $applicants = selectData($connectMySQL, $queryString, ['lotId' => $lot]);
+    $winner = array_shift($applicants);
+    array_push($winners, $winner); 
 }
 
 identifyTypeVarForlegalizationVarSymbols($winners);
@@ -34,7 +39,6 @@ $queryString = 'UPDATE lots
                 WHERE id = ?;';
 
 foreach ($winners as $winner) {
-
     $queryParam = [
         'winnerId' => $winner['userId'], 
         'id' => $winner['lotId']
@@ -43,10 +47,10 @@ foreach ($winners as $winner) {
 }
 
 if (!empty($winners)) {
-    $transport = (new Swift_SmtpTransport('smtp.mail.ru', 465))
-        ->setUsername('doingsdone@mail.ru')
-        ->setPassword('rds7BgcL')
-        ->setEncryption('ssl');
+    $transport = (new Swift_SmtpTransport(SMTP_SERVER_NAME_EMAIL_SETTING, PORT_EMAIL_SETTING))
+        ->setUsername(USER_NAME_EMAIL_SETTING)
+        ->setPassword(PASSWORD_EMAIL_SETTING)
+        ->setEncryption(ENCRYPTING_EMAIL_SETTING);
 
     $mailer = new Swift_Mailer($transport);
 }
@@ -55,15 +59,15 @@ foreach ($winners as $winner) {
     $emailVar = [
         'userName' => $winner['userName'],
         'lotName' => $winner['lotName'],
-        'myBets' => 'http://yeti-cave/mylots.php',
-        'lotUrl' => 'http://yeti-cave/lot.php?id=' . $winner['lotId']
+        'myBets' => HTTP_NAME . '://' . DOMAIN_NAME . '/mylots.php',
+        'lotUrl' => HTTP_NAME . '://' . DOMAIN_NAME . '/lot.php?lot-id=' . $winner['lotId']
     ];
     $emailContant = renderTemplate('email.php', $emailVar);  
 
     $message = (new Swift_Message('Ваша ставка победила'))
-        ->setFrom('doingsdone@mail.ru')
+        ->setFrom(USER_NAME_EMAIL_SETTING)
         ->setTo($winner['userEmail'])
-        ->setBody($emailContant, 'text/html');
+        ->setBody($emailContant, CONTENT_TYPE_EMAIL_SETTING);
 
     $mailer->send($message);
 }

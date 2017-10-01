@@ -2,10 +2,8 @@
 require_once('functions.php');
 require_once('mysql_helper.php');
 require_once('init.php');
-require_once('data.php');
+require_once('config.php');
 require_once('getwinner.php');
-
-define("LOTS_NUMBER_PAGE", 3);
 
 $title = 'Главная';
 $currentTimeMinusOneDay = date("Y-m-d H:i:s", time() - DAY_SECONDS);
@@ -27,11 +25,15 @@ $queryString = 'SELECT count(id) AS count
                 FROM lots 
                 ' . $queryCondition . ';';
 
-$lotsCount = selectData($connectMySQL, $queryString, $queryParam);
-$lotsCount = convertTwoIntoOneDimensionalArray($lotsCount);
+$findLotsCount = selectData($connectMySQL, $queryString, $queryParam);
 
-$pageCount = intval(ceil($lotsCount['count'] / LOTS_NUMBER_PAGE));
-$offset = ($currentPage - 1) * LOTS_NUMBER_PAGE;
+$lotsCount = array_shift($findLotsCount);
+if ($lotsCount === NULL) {
+    $lotsCount = [];
+}
+
+$pageCount = intval(ceil($lotsCount['count'] / INDEX_NUMBER_LOTS_PAGE));
+$offset = ($currentPage - 1) * INDEX_NUMBER_LOTS_PAGE;
 $pages = range(1, $pageCount);
 
 $pageCount = ($pageCount === 0) ? 1 : $pageCount;
@@ -42,7 +44,7 @@ if ($currentPage > $pageCount || $currentPage <= 0) {
 
 $queryCondition = "";
 $queryParam = [
-    'lotsNumberPage' => LOTS_NUMBER_PAGE,
+    'lotsNumberPage' => INDEX_NUMBER_LOTS_PAGE,
     'offset' => $offset
 ];
 

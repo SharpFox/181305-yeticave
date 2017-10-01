@@ -2,9 +2,7 @@
 require_once('functions.php');
 require_once('mysql_helper.php');
 require_once('init.php');
-require_once('data.php');
-
-define("LOTS_NUMBER_PAGE", 9);
+require_once('config.php');
 
 $currentPage = isset($_GET['page']) ? intval($_GET['page']) : 0;
 $currentCategoryId = isset($_GET['category-id']) ? intval($_GET['category-id']) : 0;
@@ -49,11 +47,15 @@ $queryString = 'SELECT count(id) AS count
 $queryParam = [
     'categoryId' => $currentCategoryId
 ];
-$lotsCount = selectData($connectMySQL, $queryString, $queryParam);
-$lotsCount = convertTwoIntoOneDimensionalArray($lotsCount);
+$findLotsCount = selectData($connectMySQL, $queryString, $queryParam);
 
-$pageCount = intval(ceil($lotsCount['count'] / LOTS_NUMBER_PAGE));
-$offset = ($currentPage - 1) * LOTS_NUMBER_PAGE;
+$lotsCount = array_shift($findLotsCount);
+if ($lotsCount === NULL) {
+    $lotsCount = [];
+}
+
+$pageCount = intval(ceil($lotsCount['count'] / ALL_LOTS_NUMBER_LOTS_PAGE));
+$offset = ($currentPage - 1) * ALL_LOTS_NUMBER_LOTS_PAGE;
 $pages = range(1, $pageCount);
 
 $pageCount = ($pageCount === 0) ? 1 : $pageCount;
@@ -90,7 +92,7 @@ $queryString = 'SELECT lots.id,
                 LIMIT ? OFFSET ?;';
 $queryParam = [
     'categoryId' => $currentCategoryId, 
-    'lotsNumberPage' => LOTS_NUMBER_PAGE,
+    'lotsNumberPage' => ALL_LOTS_NUMBER_LOTS_PAGE,
     'offset' => $offset
 ];
 $lots = selectData($connectMySQL, $queryString, $queryParam);

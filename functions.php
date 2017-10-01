@@ -1,5 +1,5 @@
 <?php 
-require_once('data.php');
+require_once('config.php');
 require_once('vendor/autoload.php');
 
 /**
@@ -550,23 +550,5 @@ function getCategories($connectMySQL) {
                     FROM categories 
                     ORDER BY id';
     return selectData($connectMySQL, $queryString);
-}
-
-/**
-* Конвертирует первый массив двумерного массива в одномерный.
-*
-* @param array $incomingArr
-* @return array
-*/
-function convertTwoIntoOneDimensionalArray($incomingArr) {
-    $result = [];
-
-    foreach($incomingArr as $key => $arr) {
-        foreach($arr as $key => $value) {
-            $result[$key] = $value;
-        }
-    }
-
-    return $result;
 }
 ?>

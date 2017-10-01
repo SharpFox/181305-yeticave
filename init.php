@@ -1,13 +1,7 @@
 <?php
 require_once('functions.php');
 require_once('mysql_helper.php');
-require_once('data.php');
-
-define("IP_MYSQL", 'localhost');
-define("USERNAME_MYSQL", 'root');
-define("PASSWORD_MYSQL", '');
-define("DATABASENAME_MYSQL", 'yeticave_181305');
-define("PORT_MYSQL", NULL);
+require_once('config.php');
 
 $connectMySQL = mysqli_connect(IP_MYSQL, USERNAME_MYSQL, PASSWORD_MYSQL, DATABASENAME_MYSQL, PORT_MYSQL);
 

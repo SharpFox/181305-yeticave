@@ -70,7 +70,7 @@
 <script>
     function selectCategory() {
         var categoryId = document.getElementById("select").value;
-        location.href = "http://yeti-cave/index.php?category-id=" + categoryId;
+        location.href = "index.php?category-id=" + categoryId;
     }
 </script>
 

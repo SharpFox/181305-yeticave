@@ -5,29 +5,29 @@
   <section class="rates container">
     <h2>Мои ставки</h2>
     <table class="rates__list">
-    <?php foreach ($bets as $key => $value): ?>
+    <?php foreach ($bets as $key => $bet): ?>
       <tr class="rates__item">
         <td class="rates__info">
           <div class="rates__img">
-            <img src=<?=$value['lotsUrl'];?> width="54" height="40" alt=<?=$value['lotName'];?>>
+            <img src=<?=$bet['lotsUrl'];?> width="54" height="40" alt=<?=$bet['lotName'];?>>
           </div>
           <div>
-            <h3 class="rates__title"><a href="lot.php?lot-id=<?=$value['lotId'];?>"><?=$value['lotName'];?></a></h3>
+            <h3 class="rates__title"><a href="lot.php?lot-id=<?=$bet['lotId'];?>"><?=$bet['lotName'];?></a></h3>
           </div>
         </td>
         <td class="rates__category">
-            <?=$value['category'];?>
+            <?=$bet['category'];?>
         </td>
         <td class="rates__timer">        
-          <div class="timer timer--finishing">
-               <?=getHumanTimeUntilRateEnd($value['endTime'])?>
+          <div class="timer<?=!empty($bet['winnerId']) ? ' timer--win' : ' timer--finishing'?>">
+           <?=!empty($bet['winnerId']) ? 'Ставка выиграла' : getHumanTimeUntilRateEnd($bet['endTime'])?>
           </div>
         </td>
         <td class="rates__price">
-            <?=number_format($value['cost'], 0, '.', ' ') . ' р';?>
+            <?=number_format($bet['cost'], 0, '.', ' ') . ' р';?>
         </td>
         <td class="rates__time">
-          <?=getHumanTimeOfLastRate($value['createdTime']);?>
+          <?=getHumanTimeOfLastRate($bet['createdTime']);?>
         </td>
       </tr>  
       <?php endforeach; ?>    

@@ -2,6 +2,7 @@
 require_once('functions.php');
 require_once('mysql_helper.php');
 require_once('init.php');
+require_once('config.php');
 
 $title = 'Вход';
 $errors = [];

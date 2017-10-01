@@ -1,7 +1,8 @@
 <?php
 require_once('functions.php');
+require_once('mysql_helper.php');
 require_once('init.php');
-require_once('data.php');
+require_once('config.php');
 
 $title = 'Регистрация';
 $errors = [];
@@ -84,7 +85,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         $findUser = selectData($connectMySQL, $queryString, $queryParam);        
         identifyTypeVarForlegalizationVarSymbols($findUser);
 
-        $user = convertTwoIntoOneDimensionalArray($findUser);
+        $user = array_shift($findUser);
+        if ($user === NULL) {
+            $user = [];
+        }
 
         if (empty($user)) {
             $errors['newUser'][] = 'Не удалось зарегистрировать нового пользователя. Повторите попытку позже.';      

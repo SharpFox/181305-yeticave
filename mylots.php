@@ -11,12 +11,12 @@ if (!isset($_SESSION['userId'])) {
 $title = 'Мои ставки';
 
 $queryString = 'SELECT bets.createdTime, 
-                    bets.endTime, 
                     bets.cost, 
                     bets.lotId, 
                     categories.name AS category, 
                     lots.name AS lotName, 
-                    lots.url AS lotsUrl
+                    lots.url AS lotsUrl,
+                    lots.endTime
                 FROM bets 
                 INNER JOIN lots ON bets.lotId = lots.id 
                 INNER JOIN categories ON lots.categoryId = categories.id 
@@ -32,7 +32,11 @@ identifyTypeVarForlegalizationVarSymbols($bets);
 $categories = getCategories($connectMySQL);
 identifyTypeVarForlegalizationVarSymbols($categories);
 
-$navContent = renderTemplate('nav.php', ['categories' => $categories]);
+$navVar = [
+    'categories' => $categories,
+    'currentCategoryId' => isset($_GET['category-id']) ? intval($_GET['category-id']) : 0   
+];
+$navContent = renderTemplate('nav.php', $navVar);
 
 $mylotsVar = [ 
     'bets' => $bets,

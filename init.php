@@ -21,7 +21,12 @@ if(!$connectMySQL) {
     $title = 'Вход';
     $isMainPage = false;
     
-    $navContent = renderTemplate('nav.php', ['goodsCategory' => $goodsCategory]);
+    $navVar = [
+        'categories' => $categories,
+        'currentCategoryId' => isset($_GET['category-id']) ? intval($_GET['category-id']) : 0   
+    ];
+    $navContent = renderTemplate('nav.php', $navVar);
+    
     $errorContent = renderTemplate('error.php', ['errorMessage' => mysqli_connect_error()]);
     
     $layoutContent = renderLayout($errorContent, $navContent, $title, $isMainPage);

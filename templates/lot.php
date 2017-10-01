@@ -14,8 +14,6 @@
                 <p class="lot-item__description"><?=$lot['description']?></p>
             </div>
             <div class="lot-item__right">
-                <?php if ($isAuth): ?> 
-                <?php if (!$isBetMade):?> 
                 <div class="lot-item__state">
                     <div class="lot-item__timer timer">
                         <?=getHumanTimeUntilRateEnd($lot['endTime'])?>
@@ -29,20 +27,22 @@
                             Мин. ставка <span><?=$lot['currentCost']?></span>
                         </div>
                     </div>
-                    <form class="lot-item__form<?=!empty($errors) ? ' form--invalid' : '';?>" action="lot.php?id=<?=$lot['lotId'];?>" method="post">
- 
-                        <p class="lot-item__form-item<?=key_exists('cost', $errors) ? ' form__item--invalid' : '';?>">
-                            <label for="cost">Ваша ставка</label>
-                            <input id="cost" type="number" step="<?=$lot['step']?>" value="<?=$lot['currentCost']?>" name="cost" placeholder="<?=$lot['currentCost']?>">
-                            <span class="form__error"><?=key_exists('cost', $errors) ? implode(', ', $errors['cost']) : ''?></span>
-                            <p></p>
-                        </p>
-                        <button type="submit" class="button">Сделать ставку</button>
-
-                    </form>
+                    <?php if ($isAuth): ?> 
+                        <?php if (!$isCurrentUserAuthor): ?>   
+                            <?php if (!$isBetMade): ?>                  
+                            <form class="lot-item__form<?=!empty($errors) ? ' form--invalid' : '';?>" action="lot.php?lot-id=<?=$lot['lotId'];?>" method="post"> 
+                                <p class="lot-item__form-item<?=key_exists('cost', $errors) ? ' form__item--invalid' : '';?>">
+                                    <label for="cost">Ваша ставка</label>
+                                    <input id="cost" type="number" step="<?=$lot['step']?>" value="<?=$lot['currentCost']?>" name="cost" placeholder="<?=$lot['currentCost']?>">
+                                    <span class="form__error"><?=key_exists('cost', $errors) ? implode(', ', $errors['cost']) : ''?></span>
+                                    <p></p>
+                                </p>
+                                <button type="submit" class="button">Сделать ставку</button>
+                            </form>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
-                <?php endif; ?>
-                <?php endif; ?>
                 <div class="history">
                     <h3>История ставок (<span><?=$lot['quantityBets']?></span>)</h3>
                     <table class="history__list">

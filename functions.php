@@ -103,23 +103,31 @@ function makeSymbolsLegal($incomingData) {
 *
 * @param array $arr 
 * @param boolean $result 
+* @param string $keyName 
+* @param mixed $keyValue 
 */
-function findIdInLot(& $arr, & $result) {
-    if ($result) {
-        return;
-    }
-
+function findKeyAndValueInArray(& $arr, & $result, $keyName, $keyValue = NULL) {
     foreach ($arr as $key => $value) {
         if(is_array($value)) {
-            findIdInLot($value, $result);
-            return;
-        } 
+            findKeyAndValueInArray($value, $result, $keyName, $keyValue);
 
+            if ($result) {
+                return;
+            }
+
+            continue;
+        } 
         if ($result) {
             return;
         }
 
-        $result = $key === 'lotId' ? true : false;        
+        if ($keyValue === NULL) {
+            $result = ($key === $keyName) ? true : false;    
+            continue;  
+        }
+
+        $isKeyFound = ($key === $keyName) ? true : false;
+        $result = ($isKeyFound && $value === $keyValue) ? true : false;               
     }
 }
 
@@ -218,7 +226,7 @@ function printErrorInfoNotFound() {
 * Проверяет существование сессии.
 */
 function checkSessionAccess() {
-    if (isset($_SESSION['user'])) {
+    if (isset($_SESSION['userName'])) {
         return;    
     }
 
@@ -288,6 +296,7 @@ function validateFormFields($rules, &$errors) {
 function validateFile($attributeValue) {
     $result = null;
     $maxSize = FILE_MAX_SIZE;
+    $imageFormatArr = ['image/jpeg', 'image/jpg', 'image/png'];
 
     if (empty($_FILES[$attributeValue]['tmp_name'])) {
         return "Файл не выбран";    
@@ -295,7 +304,7 @@ function validateFile($attributeValue) {
 
     $type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $_FILES[$attributeValue]['tmp_name']);
 
-    if ($type !== 'image/jpeg' && $type !== 'image/jpg' && $type !== 'image/png') {
+    if (!in_array($type, $imageFormatArr)) {
         $result = 'Загрузите картинку в формате jpeg/jpg/png';   
     }
 
@@ -358,11 +367,11 @@ function searchUserByEmail($email, $connectMySQL) {
 * @return array
 */
 function getUserMenuVar() {
-    $sessionOpen = isset($_SESSION['user']);
+    $sessionOpen = isset($_SESSION['userName']);
     
     $userVar = [
         'isAuth' => $sessionOpen,
-        'userName' => $sessionOpen ? $_SESSION['user'] : '',
+        'userName' => $sessionOpen ? $_SESSION['userName'] : '',
         'userAvatar' => $sessionOpen ? $_SESSION['avatarUrl'] : ''
     ];
 
@@ -397,7 +406,7 @@ function authorizeUser(&$errors, $connectMySQL) {
         return;
     } 
 
-    $_SESSION['user'] = $user['name'];
+    $_SESSION['userName'] = $user['name'];
     $_SESSION['email'] = $user['email'];
     $_SESSION['userId'] = intval($user['id']);
     $_SESSION['avatarUrl'] = $user['url'];
@@ -421,7 +430,7 @@ function doRealEscapeStringToArrayElements($arr, $funcName, $connect) {
 
     foreach ($arr as $key => $value) {
         if(is_array($value)) {
-            $ret = applyFunctionToArrayElements($value, $funcName, $connect);
+            $ret = doRealEscapeStringToArrayElements($value, $funcName, $connect);
            
             if(count($ret)) {
                 $result[] = $ret;  
@@ -535,7 +544,9 @@ function execAnyQuery($connect, $query, $data = []) {
 * @return array
 */
 function getCategories($connectMySQL) {
-    $queryString = 'SELECT name 
+    $queryString = 'SELECT name,
+                        id,
+                        class 
                     FROM categories 
                     ORDER BY id';
     return selectData($connectMySQL, $queryString);

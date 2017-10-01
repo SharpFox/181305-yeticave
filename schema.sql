@@ -15,6 +15,7 @@ CREATE TABLE users (
 CREATE TABLE categories (
   id 		INT UNSIGNED 	AUTO_INCREMENT,
   name 	VARCHAR(40) 	NOT NULL,
+  class VARCHAR(100) NOT NULL,
   PRIMARY KEY(id)
 ) ENGINE = InnoDB CHARACTER SET = UTF8;
 
@@ -43,7 +44,6 @@ CREATE TABLE lots (
 CREATE TABLE bets (
   id 				    INT UNSIGNED  AUTO_INCREMENT,
   createdTime   DATETIME,
-  endTime       DATETIME 		  NOT NULL,
   cost 			    DOUBLE        NOT NULL,
   userId 		    INT UNSIGNED,
   lotId 			  INT UNSIGNED,

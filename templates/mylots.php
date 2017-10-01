@@ -12,7 +12,7 @@
             <img src=<?=$value['lotsUrl'];?> width="54" height="40" alt=<?=$value['lotName'];?>>
           </div>
           <div>
-            <h3 class="rates__title"><a href="lot.php?id=<?=$value['lotId'];?>"><?=$value['lotName'];?></a></h3>
+            <h3 class="rates__title"><a href="lot.php?lot-id=<?=$value['lotId'];?>"><?=$value['lotName'];?></a></h3>
           </div>
         </td>
         <td class="rates__category">

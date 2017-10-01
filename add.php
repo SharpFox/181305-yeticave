@@ -51,7 +51,11 @@ if (!empty($_FILES)) {
 $categories = getCategories($connectMySQL);
 identifyTypeVarForlegalizationVarSymbols($categories);
 
-$navContent = renderTemplate('nav.php', ['categories' => $categories]);
+$navVar = [
+    'categories' => $categories,
+    'currentCategoryId' => isset($_GET['category-id']) ? intval($_GET['category-id']) : 0   
+];
+$navContent = renderTemplate('nav.php', $navVar);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($_POST)) {
     $errors['add-img'][] = 'Возникла непредвиденная ошибка. Возможно, была предпринята попытка загрузки файла
@@ -95,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         'step' => intval($_POST['lot-step']),       
         'quantityBets' => 0,
         'categoryId' => $findCategory[0]['id'],
-        'authorId' => isset($_SESSION['userId']) ? intval($_SESSION['userId']) : NULL,
+        'authorId' => isset($_SESSION['userId']) ? intval($_SESSION['userId']) : 0,
         'createdTime' => date("Y-m-d H:i:s", time())
     ];  
 
@@ -104,22 +108,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
     $queryString = 'SELECT lots.id AS lotId, 
                         lots.name AS lotName, 
                         lots.cost AS lastCost, 
-                        lots.step, lots.cost + lots.step AS currentCost, 
-                        lots.url, lots.description,
+                        lots.step, 
+                        lots.cost + lots.step AS currentCost, 
+                        lots.url, 
+                        lots.description,
                         lots.endTime, 
-                        lots.quantityBets, 
+                        lots.quantityBets,
+                        lots.authorId, 
                         categories.name AS category 
                     FROM lots 
                     INNER JOIN categories ON lots.categoryId = categories.id
                     WHERE lots.id = ?';        
     $queryParam = [
-        'category' => $lotId
+        'id' => $lotId
     ];
 
     $findLot = selectData($connectMySQL, $queryString, $queryParam);    
     identifyTypeVarForlegalizationVarSymbols($findLot);
 
     $lot = convertTwoIntoOneDimensionalArray($findLot);
+
+    $currentUserId = isset($_SESSION['userId']) ? intval($_SESSION['userId']) : 0;
+    $isCurrentUserAuthor = ($lot['authorId'] === $currentUserId) ? true : false;
     
     $lotVar = [
         'lot' => $lot,
@@ -127,10 +137,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST) && empty($errors)) {
         'bets' => array(),
         'isBetMade' => false,
         'isAuth' => isset($_SESSION['userId']),
+        'isCurrentUserAuthor' => $isCurrentUserAuthor,
         'errors' => $errors
     ];
 
-    header('location: lot.php?id=' . $lotId . '');
+    header('location: lot.php?lot-id=' . $lotId . '');
 
     $mainContent = renderTemplate('lot.php', $lotVar);
 } else {

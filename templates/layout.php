@@ -14,7 +14,7 @@
         <a class="main-header__logo" href="index.php">
             <img src="img/logo.svg" width="160" height="39" alt="Логотип компании YetiCave">
         </a>
-        <form class="main-header__search" method="get" action="https://echo.htmlacademy.ru">
+        <form class="main-header__search" method="get" action="search.php">
             <input type="search" name="search" placeholder="Поиск лота">
             <input class="main-header__search-btn" type="submit" name="find" value="Найти">
         </form>
@@ -66,6 +66,13 @@
         </div>
     </div>
 </footer>
+
+<script>
+    function selectCategory() {
+        var categoryId = document.getElementById("select").value;
+        location.href = "http://yeti-cave/index.php?category-id=" + categoryId;
+    }
+</script>
 
 </body>
 </html>

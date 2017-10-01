@@ -3,7 +3,7 @@
 
     <li class="pagination-item pagination-item-prev">
         <?php if ($currentPage !== 1):?>
-        <a href="index.php?page=<?=($currentPage - 1)?>">Назад</a>
+        <a href="<?=$scriptPHPName?>.php?page=<?=($currentPage - 1)?><?=isset($linkParametrs) ? implode('', $linkParametrs) : ''?>">Назад</a>
         <?php else:?>
         <a>Назад</a>
         <?php endif;?>
@@ -12,7 +12,7 @@
     <?php foreach ($pages as $page):?>
     <li class="pagination-item <?=($page === $currentPage) ? 'pagination-item-active' : '' ;?> ">
         <?php if ($page !== $currentPage):?>
-        <a href="index.php?page=<?=$page?>"><?=$page;?></a>
+        <a href="<?=$scriptPHPName?>.php?page=<?=$page?><?=isset($linkParametrs) ? implode('', $linkParametrs) : ''?>"><?=$page;?></a>
         <?php else:?>
         <a><?=$page;?></a>
         <?php endif;?>
@@ -21,7 +21,7 @@
 
     <li class="pagination-item pagination-item-next">  
     <?php if ($currentPage !== $pageCount):?>
-    <a href="index.php?page=<?=($currentPage + 1)?>">Вперед</a>
+    <a href="<?=$scriptPHPName?>.php?page=<?=($currentPage + 1)?><?=isset($linkParametrs) ? implode('', $linkParametrs) : ''?>">Вперед</a>
      <?php else:?>
     <a>Вперед</a>
      <?php endif;?>  

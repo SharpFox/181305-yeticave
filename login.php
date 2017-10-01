@@ -23,7 +23,11 @@ if (!empty($_POST)) {
 $categories = getCategories($connectMySQL);
 identifyTypeVarForlegalizationVarSymbols($categories);
 
-$navContent = renderTemplate('nav.php', ['categories' => $categories]);
+$navVar = [
+    'categories' => $categories,
+    'currentCategoryId' => isset($_GET['category-id']) ? intval($_GET['category-id']) : 0   
+];
+$navContent = renderTemplate('nav.php', $navVar);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST)) {
     validateFormFields($rules, $errors);

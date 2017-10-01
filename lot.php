@@ -14,7 +14,7 @@ $rules = [
     ]
 ];
 
-$lotId = isset($_GET['id']) ? intval($_GET['id']) : null;
+$lotId = isset($_GET['lot-id']) ? intval($_GET['lot-id']) : 0;
 
 $queryString = 'SELECT lots.id AS lotId, 
                     lots.name AS lotName, 
@@ -26,6 +26,7 @@ $queryString = 'SELECT lots.id AS lotId,
                     lots.createdTime, 
                     lots.step, 
                     lots.quantityBets, 
+                    lots.authorId,
                     categories.name AS category 
                 FROM lots 
                 INNER JOIN categories ON lots.categoryId = categories.id
@@ -38,13 +39,16 @@ $findLot = selectData($connectMySQL, $queryString, $queryParam);
 identifyTypeVarForlegalizationVarSymbols($findLot);
 
 $isLotFind = false;
-findIdInLot($findLot, $isLotFind);
+findKeyAndValueInArray($findLot, $isLotFind, 'lotId');
 
 if (!$isLotFind) {
     printErrorInfoNotFound();
 }
 
 $lot = convertTwoIntoOneDimensionalArray($findLot);
+
+$currentUserId = isset($_SESSION['userId']) ? intval($_SESSION['userId']) : 0;
+$isCurrentUserAuthor = ($lot['authorId'] === $currentUserId) ? true : false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     validateFormFields($rules, $errors);
@@ -60,10 +64,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
     
     $betData = [
         'createdTime' => date("Y-m-d H:i:s", time()),
-        'endTime' => date("Y-m-d H:i:s", strtotime($lot['endTime'])),
         'cost' => intval($_POST['cost']),
-        'userId' => isset($_SESSION['user']) ? intval($_SESSION['userId']) : intval(NULL),
-        'lotId' => isset($_GET['id']) ? intval($_GET['id']) : intval(null)
+        'userId' => isset($_SESSION['userId']) ? intval($_SESSION['userId']) : 0,
+        'lotId' => isset($_GET['lot-id']) ? intval($_GET['lot-id']) : 0
     ];  
 
     $betId = insertData($connectMySQL, 'bets', $betData);
@@ -86,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
         mysqli_query($connectMySQL, "ROLLBACK");
     }
     
-    header('location: lot.php?id=' . $lotId . '');;
+    header('location: lot.php?lot-id=' . $lotId . '');;
     exit();
 }
 
@@ -110,7 +113,7 @@ identifyTypeVarForlegalizationVarSymbols($bets);
 $isBetMade = false;
 
 foreach($bets as $key=> $bet) {
-    if (intval($bet['userId']) === (isset($_SESSION['userId']) ? intval($_SESSION['userId']) : NULL)) { 
+    if (intval($bet['userId']) === $currentUserId) { 
         $isBetMade = true;
         break;
     }
@@ -119,14 +122,19 @@ foreach($bets as $key=> $bet) {
 $categories = getCategories($connectMySQL);
 identifyTypeVarForlegalizationVarSymbols($categories);
 
-$navContent = renderTemplate('nav.php', ['categories' => $categories]);
+$navVar = [
+    'categories' => $categories,
+    'currentCategoryId' => isset($_GET['category-id']) ? intval($_GET['category-id']) : 0   
+];
+$navContent = renderTemplate('nav.php', $navVar);
 
 $lotVar = [ 
     'lot' => $lot,
     'navigationMenu' => $navContent,
     'bets' => $bets,
     'isBetMade' => $isBetMade,
-    'isAuth' => isset($_SESSION['userId']) ? true : false,
+    'isAuth' => isset($_SESSION['userId']),
+    'isCurrentUserAuthor' => $isCurrentUserAuthor,
     'errors' => $errors
 ];
 

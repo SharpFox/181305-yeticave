@@ -3,6 +3,7 @@
     "description": "Личный проект «YetiCave» от HTML Academy",
     "type": "project",
     "require": {
-        "twig/twig": "~1.8"
+        "twig/twig": "~1.8",
+        "swiftmailer/swiftmailer": "^6.0"
     }
 }
